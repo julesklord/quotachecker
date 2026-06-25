@@ -1,45 +1,27 @@
-# QuotaChecker-TUI 📊
+# QuotaChecker-TUI
 
 [![Crates.io](https://img.shields.io/crates/v/quotachecker-tui.svg?style=flat-square)](https://crates.io/crates/quotachecker-tui)
 [![Crates.io Downloads](https://img.shields.io/crates/d/quotachecker-tui.svg?style=flat-square)](https://crates.io/crates/quotachecker-tui)
-[![Rust Version](https://img.shields.io/badge/rust-1.85+-orange.svg?style=flat-square)](https://www.rust-lang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg?style=flat-square)](LICENSE)
 
-> A terminal-based real-time dashboard designed to monitor local AI coding agents, track API requests, count token usage, and estimate cumulative costs directly from your terminal.
+A terminal dashboard to track usage limits and token consumption of your local AI coding assistants.
 
----
+## What it does
 
-## 🔍 Overview
+Tracks requests and token usage in the background by querying the local database and log files of your installed coding assistants.
 
-**QuotaChecker-TUI** is a lightweight, responsive terminal user interface (TUI) built with [Ratatui](https://ratatui.rs) and [Crossterm](https://github.com/crossterm-rs/crossterm). It operates entirely locally by spawning a background thread to safely query the local telemetry databases and logs of active AI tools (Codex, OpenCode, Agy, Zed) without blocking the UI thread.
+### Supported Assistants
 
----
-
-## ✨ Key Features
-
-- **⚡ Asynchronous Scanning**: Periodic system scanning executes in a background thread utilizing SQLite busy timeouts (`500ms`) to prevent database write locks on active AI tools.
-- **🏷️ Smart Tier-Based Quotas**: Automatically detects the active authentication state and user tier (e.g., Enterprise vs Personal) of your AI tools to apply exact quota limits.
-- **📈 Proportional Model Distribution**: Distributes overall quota budgets among individual LLM models using proportional ratios defined by the active tier.
-- **⚙️ Custom Overrides**: Allows the user to configure custom quota limits directly from the TUI, dynamically adjusting model limits proportionally.
-- **🎨 Modern TUI Aesthetics**: Supports multiple premium styling themes (Cyan, Purple, Emerald, Amber, Monochrome) with full support for terminal transparency (uses `Color::Reset` for backgrounds).
-
----
-
-## 🛠️ Supported Agents
-
-| Agent | Local Data Source | Monitored Metrics | Quota Reset Freq |
+| Assistant | Data Source | Collected Metrics | Reset Freq |
 | :--- | :--- | :--- | :--- |
-| 💻 **Codex** | `~/.codex/state_5.sqlite` | Sessions, requests, tokens | Daily |
-| 🛡️ **OpenCode** | `~/.local/share/opencode/opencode.db` | Sessions, requests, tokens, spent cost | Monthly |
-| 🤖 **Agy** | `~/.gemini/antigravity-cli/log/` | CLI prompts, command logs | Weekly |
-| 🎨 **Zed** | `~/.local/share/zed/threads/threads.db` | Active assistant threads | Daily |
+| Codex | `~/.codex/state_5.sqlite` | Sessions, requests, tokens | Daily |
+| OpenCode | `~/.local/share/opencode/opencode.db` | Sessions, requests, tokens, spent cost | Monthly |
+| Agy | `~/.gemini/antigravity-cli/log/` | CLI prompts, command logs | Weekly |
+| Zed | `~/.local/share/zed/threads/threads.db` | Active threads | Daily |
 
----
-
-## 🚀 Installation
+## Installation
 
 ### From crates.io (Recommended)
-Install the binary directly from crates.io using Cargo:
 ```bash
 cargo install quotachecker-tui
 ```
@@ -50,19 +32,16 @@ cargo install --git https://github.com/julesklord/quotachecker-tui
 ```
 
 ### From Source
-Compile and install from source manually:
 ```bash
 git clone https://github.com/julesklord/quotachecker-tui.git
 cd quotachecker-tui
 cargo build --release
-# The compiled binary is located at ./target/release/quotachecker-tui
 ```
+The compiled binary is located at `./target/release/quotachecker-tui`.
 
----
+## Usage
 
-## ⌨️ Usage
-
-Run the dashboard from your terminal:
+Run the dashboard:
 ```bash
 quotachecker-tui
 ```
@@ -71,30 +50,26 @@ quotachecker-tui
 
 | Key | Action |
 | :--- | :--- |
-| `Tab` / `←` `→` | Switch between tabs |
-| `↑` `↓` | Navigate list items |
-| `s` | Modify global quota limit for the selected agent |
-| `+` / `-` or `l` / `h` | Adjust option values in the Settings tab |
-| `Enter` | Confirm and save modal inputs |
-| `Esc` | Cancel / close modal |
-| `r` | Force-trigger an immediate background telemetry scan |
-| `q` / `Ctrl+c` | Safe application exit |
+| `Tab` / `←` `→` | Switch tabs |
+| `↑` `↓` | Navigate lists |
+| `s` | Edit active assistant request limits |
+| `+` / `-` | Modify values in Settings |
+| `Enter` | Confirm and save inputs |
+| `Esc` | Cancel modal |
+| `r` | Force-trigger a background telemetry scan |
+| `q` | Quit |
 
-### Dashboard Tabs
+### Available Tabs
 
-1. **📊 Overview** — Shows spent costs, total tokens, and request counts aggregated across all coding assistants.
-2. **🤖 AI Agents** — Detailed dashboard per agent showing version, configuration paths, active tier, and model usage breakdown.
-3. **🕒 Sessions** — Chronological telemetry logs and historical thread details.
-4. **📉 Quotas** — Displays usage bar gauges alongside configured warning thresholds (Soft/Hard limits).
-5. **⚙️ Settings** — Customize app preferences, refresh rate, theme accents, and threshold limits.
+1. **Overview** — Aggregate costs, tokens, and requests across all assistants.
+2. **AI Agents** — Versions, configurations, and quota breakdown for the selected assistant.
+3. **Sessions** — Past sessions and telemetry logs.
+4. **Quotas** — Usage gauges with warning thresholds.
+5. **Settings** — Refresh intervals and visual themes.
 
----
+## Configuration
 
-## ⚙️ Configuration
-
-The application stores its configuration file at `~/.config/quotachecker-tui/config.json` (or the equivalent config directory for your OS).
-
-### Configuration Schema Example
+The config file is located at `~/.config/quotachecker-tui/config.json`.
 
 ```json
 {
@@ -126,52 +101,18 @@ The application stores its configuration file at `~/.config/quotachecker-tui/con
 }
 ```
 
-### Parameter Explanations
-- `refresh_rate_ms`: How frequently (in milliseconds) the background scanner thread queries local data sources.
-- `soft_limit_percent`: Usage percentage at which gauges turn amber to warn the user.
-- `hard_limit_percent`: Usage percentage at which gauges turn red indicating the quota limit is reached.
-- `custom`: If set to `true`, the scanner respects the custom `limit` set by the user instead of overriding it with the default tier limits.
+### Configuration Fields
+- `refresh_rate_ms`: Delay in milliseconds between background scans.
+- `soft_limit_percent`: Percentage where gauges turn yellow to warn the user.
+- `hard_limit_percent`: Percentage where gauges turn red indicating limit is reached.
+- `custom`: When set to `true`, the application respects your configured limit. When `false`, it defaults to the detected tier quota.
 
----
+## Architecture
 
-## 🏗️ Architecture
+- **Asynchronous Telemetry**: A background thread reads SQLite databases using a `500ms` busy timeout to avoid write locks on active AI tools.
+- **In-Memory Cache**: Shared config uses `Arc<RwLock<AppConfig>>` to prevent constant disk I/O.
+- **Panic Hook**: Restores terminal state if the application crashes unexpectedly.
 
-```mermaid
-graph TD
-    UI[Ratatui UI Thread] <--> |MPSC Channel| SCAN[Background Scan Thread]
-    SCAN --> |SQL Read & Logs| SQLite[(Local SQLite DBs & Logs)]
-    UI --> |Read/Write| Config[(config.json)]
-    SCAN --> |Reads custom limits| Config
-```
+## License
 
-- **Background Scanning**: Scans are performed asynchronously on a dedicated thread to ensure zero UI freezes.
-- **In-Memory Cache**: The config is loaded into an `Arc<RwLock<AppConfig>>` allowing instant lookups and writes.
-- **Exec Cache**: Utilizes a `OnceLock<Mutex<HashMap>>` cache for CLI path checks (`which`) and version execution lookups.
-- **Panic Protection**: A custom panic hook automatically catches unexpected failures to safely restore the raw terminal state on crash.
-
----
-
-## 🛠️ Development & Quality Controls
-
-We enforce strict Rust style and quality policies:
-
-```bash
-cargo test        # Run the full test suite
-cargo clippy      # Run Clippy lints to check code quality
-cargo fmt         # Format files following rustfmt rules
-```
-
----
-
-## 📚 Reference Docs
-
-- [Architecture Design & ADRs](docs/wiki/architecture.md)
-- [Agent SOP Guide](docs/wiki/agent-sop.md)
-- [Development Guidelines](docs/wiki/development.md)
-- [Hygiene Standards](docs/wiki/hygiene.md)
-
----
-
-## 📄 License
-
-Distributed under the MIT License. See [LICENSE](LICENSE) for details.
+MIT License. See [LICENSE](LICENSE).
