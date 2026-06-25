@@ -2,6 +2,10 @@
 name = "quotachecker-tui"
 version = "0.2.0"
 edition = "2021"
+description = "AI Agent Quota Monitoring TUI dashboard"
+license = "MIT"
+repository = "https://github.com/julesklord/quotachecker-tui"
+readme = "README.md"
 
 [dependencies]
 ratatui = { version = "0.30.0", features = ["serde", "macros"] }
