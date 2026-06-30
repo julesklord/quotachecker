@@ -344,11 +344,12 @@ impl AgentScanner {
     }
 
     pub fn get_version(executable: &str) -> Option<String> {
-        let output = Command::new(executable)
-            .arg("--version")
-            .output()
-            .or_else(|_| Command::new(executable).arg("-v").output())
-            .ok()?;
+        let output_res = Command::new(executable).arg("--version").output();
+
+        let output = match output_res {
+            Ok(out) if out.status.success() => out,
+            _ => Command::new(executable).arg("-v").output().ok()?,
+        };
 
         if output.status.success() {
             let ver = String::from_utf8_lossy(&output.stdout).trim().to_string();
@@ -1179,5 +1180,65 @@ impl AgentScanner {
         });
 
         agents
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::fs;
+    use std::os::unix::fs::PermissionsExt;
+    use std::path::PathBuf;
+
+    fn create_mock_executable(name: &str, script_content: &str) -> PathBuf {
+        let dir = std::env::temp_dir();
+        let path = dir.join(name);
+        fs::write(&path, script_content).unwrap();
+        let mut perms = fs::metadata(&path).unwrap().permissions();
+        perms.set_mode(0o755);
+        fs::set_permissions(&path, perms).unwrap();
+        path
+    }
+
+    #[test]
+    fn test_get_version_success_long_flag() {
+        let script = "#!/bin/sh\nif [ \"$1\" = \"--version\" ]; then\n    echo \"mock-app v1.0.0\"\n    exit 0\nfi\nexit 1\n";
+        let path = create_mock_executable("mock_app_long", script);
+        let version = AgentScanner::get_version(path.to_str().unwrap());
+        assert_eq!(version, Some("mock-app v1.0.0".to_string()));
+        let _ = fs::remove_file(path);
+    }
+
+    #[test]
+    fn test_get_version_success_short_flag() {
+        let script = "#!/bin/sh\nif [ \"$1\" = \"-v\" ]; then\n    echo \"mock-app v2.0.0\"\n    exit 0\nfi\nexit 1\n";
+        let path = create_mock_executable("mock_app_short", script);
+        let version = AgentScanner::get_version(path.to_str().unwrap());
+        assert_eq!(version, Some("mock-app v2.0.0".to_string()));
+        let _ = fs::remove_file(path);
+    }
+
+    #[test]
+    fn test_get_version_fallback_codex() {
+        let script = "#!/bin/sh\nexit 1\n";
+        let path = create_mock_executable("mock_codex_app", script);
+        let version = AgentScanner::get_version(path.to_str().unwrap());
+        assert_eq!(version, Some("v1.2.0".to_string()));
+        let _ = fs::remove_file(path);
+    }
+
+    #[test]
+    fn test_get_version_fallback_zeditor() {
+        let script = "#!/bin/sh\nexit 1\n";
+        let path = create_mock_executable("mock_zeditor_app", script);
+        let version = AgentScanner::get_version(path.to_str().unwrap());
+        assert_eq!(version, Some("v2.1.0".to_string()));
+        let _ = fs::remove_file(path);
+    }
+
+    #[test]
+    fn test_get_version_not_found() {
+        let version = AgentScanner::get_version("/path/to/nonexistent/executable/mock_app");
+        assert_eq!(version, None);
     }
 }

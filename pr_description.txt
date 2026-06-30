@@ -1,0 +1,12 @@
+🎯 **What:**
+- The functionality for parsing execution versions in `AgentScanner::get_version` lacked test coverage and decoupled mocking mechanisms, making it vulnerable to breaking changes without immediate feedback.
+- Modified `AgentScanner::get_version` slightly to allow fallback handling to function deterministically across different platforms by checking explicitly if status execution succeeds before trying the fallback `"-v"` argument.
+
+📊 **Coverage:**
+- Coverage of successful parsing when the command succeeds with the `--version` flag.
+- Coverage of successful parsing when the command fails with `--version` but succeeds with the `-v` flag.
+- Coverage for fallback returns (hardcoded versions) for when commands matching names like "codex" and "zeditor" fail entirely.
+- Coverage for returning `None` when the provided executable path simply does not exist.
+
+✨ **Result:**
+- Test coverage for `AgentScanner::get_version` increased significantly with solid testing mock constructs ensuring reliability decoupled from host system states. The `quotachecker-tui` now has more reliable quota and version polling.
