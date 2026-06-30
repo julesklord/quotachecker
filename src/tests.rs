@@ -2,6 +2,7 @@
 mod tests {
     use crate::agent::{base64_decode, decode_jwt_payload};
     use crate::config::AppConfig;
+    use chrono::{Datelike, Duration, Local};
 
     #[test]
     fn test_base64_decode() {
@@ -212,5 +213,27 @@ exit 0").unwrap();
             "Seconds until reset should be less than or equal to 25 hours"
         );
     }
+
+    #[test]
+    fn test_seconds_until_weekly_reset() {
+        use crate::agent::seconds_until_weekly_reset;
+
+        let seconds = seconds_until_weekly_reset();
+
+        // The returned seconds should be strictly positive
+        assert!(seconds > 0, "Seconds until weekly reset should be positive");
+        assert!(
+            seconds <= 8 * 24 * 3600,
+            "Seconds should not exceed one week"
+        );
+
+        let expected_reset_time = Local::now() + Duration::seconds(seconds);
+
+        let reset_day = (expected_reset_time + Duration::seconds(2)).weekday();
+        assert_eq!(
+            reset_day,
+            chrono::Weekday::Mon,
+            "Reset should happen on a Monday"
+        );
     }
 }

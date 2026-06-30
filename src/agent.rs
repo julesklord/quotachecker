@@ -134,7 +134,7 @@ fn get_cached_version(executable: &str) -> Option<String> {
         .clone()
 }
 
-fn seconds_until_weekly_reset() -> i64 {
+pub(crate) fn seconds_until_weekly_reset() -> i64 {
     use chrono::{Duration, Local, TimeZone};
     let now = Local::now();
     let weekday_num = now.weekday().num_days_from_monday() as i64; // Mon=0, Tue=1, ..., Sun=6
