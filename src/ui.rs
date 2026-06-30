@@ -170,11 +170,11 @@ fn draw_header(f: &mut Frame, area: Rect, ctx: &RenderContext) {
 
     // ── 2. Navigation Tabs ────────────────────────────────────────────────────
     let tab_titles = vec![
-        " Overview ",
-        " AI Agents ",
-        " Sessions ",
-        " Quotas ",
-        " Settings ",
+        " 1 Overview ",
+        " 2 AI Agents ",
+        " 3 Sessions ",
+        " 4 Quotas ",
+        " 5 Settings ",
     ];
     let tabs = Tabs::new(tab_titles)
         .select(ctx.active_tab)
@@ -1580,7 +1580,7 @@ fn draw_settings_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
             ),
             Span::styled("  Select   ", Style::default().fg(COLOR_MUTED)),
             Span::styled(
-                " ←→ / Enter ",
+                " Enter / +/- ",
                 Style::default().fg(Color::Black).bg(COLOR_DIM).bold(),
             ),
             Span::styled("  Cycle value", Style::default().fg(COLOR_MUTED)),
@@ -1626,14 +1626,16 @@ fn draw_footer(f: &mut Frame, area: Rect, ctx: &RenderContext) {
     match ctx.active_tab {
         1 | 3 => {
             footer_spans.extend(kpill("↑↓", "Select agent", COLOR_DIM));
-            footer_spans.extend(kpill("s", "Edit quota", color_primary));
+            if ctx.agents[ctx.selected_agent_idx].executable_path.is_some() {
+                footer_spans.extend(kpill("s", "Edit quota", color_primary));
+            }
         }
         4 => {
             footer_spans.extend(kpill("↑↓", "Select", COLOR_DIM));
             if ctx.selected_setting_idx == 4 {
                 footer_spans.extend(kpill("Enter", "Open editor", color_primary));
             } else {
-                footer_spans.extend(kpill("←→", "Cycle value", color_primary));
+                footer_spans.extend(kpill("Enter/+/-", "Cycle value", color_primary));
             }
         }
         _ => {
