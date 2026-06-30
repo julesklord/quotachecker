@@ -223,4 +223,23 @@ mod tests {
         let new_content = fs::read_to_string(&config_path).unwrap();
         assert!(serde_json::from_str::<AppConfig>(&new_content).is_ok());
     }
+
+    #[test]
+    fn test_save_config() {
+        let dir = tempdir().unwrap();
+        let config_path = dir.path().join("config.json");
+        set_test_config_path(Some(config_path.clone()));
+
+        let mut config = AppConfig::default();
+        config.refresh_rate_ms = 9999;
+        config.theme = TuiTheme::Purple;
+
+        assert!(config.save().is_ok());
+        assert!(config_path.exists());
+
+        let content = fs::read_to_string(&config_path).unwrap();
+        let loaded: AppConfig = serde_json::from_str(&content).unwrap();
+        assert_eq!(loaded.refresh_rate_ms, 9999);
+        assert_eq!(loaded.theme, TuiTheme::Purple);
+    }
 }
