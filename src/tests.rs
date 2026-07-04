@@ -84,7 +84,10 @@ mod tests {
         }
 
         use std::time::{SystemTime, UNIX_EPOCH};
-        let timestamp = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_nanos();
+        let timestamp = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_nanos();
         let temp_dir = env::temp_dir().join(format!("quotachecker_test_home_{}", timestamp));
         let bin_dir = temp_dir.join(".local/bin");
         fs::create_dir_all(&bin_dir).unwrap();
@@ -93,8 +96,12 @@ mod tests {
 
         let mock_cmd = format!("mock_cmd_for_test_{}", timestamp);
         let mock_executable = bin_dir.join(&mock_cmd);
-        fs::write(&mock_executable, "#!/bin/sh
-exit 0").unwrap();
+        fs::write(
+            &mock_executable,
+            "#!/bin/sh
+exit 0",
+        )
+        .unwrap();
 
         #[cfg(unix)]
         {
@@ -104,13 +111,11 @@ exit 0").unwrap();
             fs::set_permissions(&mock_executable, perms).unwrap();
         }
 
-
         let result = AgentScanner::check_executable(&mock_cmd);
 
         let _ = fs::remove_dir_all(&temp_dir);
         assert_eq!(result, Some(mock_executable.to_string_lossy().to_string()));
     }
-
 
     #[test]
     fn test_tier_quota_limits() {
@@ -239,7 +244,7 @@ exit 0").unwrap();
 
     #[test]
     fn test_scan_all_agents() {
-        use crate::agent::{AgentScanner, AgentId};
+        use crate::agent::{AgentId, AgentScanner};
         let config = AppConfig::default();
         let agents = AgentScanner::scan(&config);
         assert_eq!(agents.len(), 9);
