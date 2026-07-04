@@ -762,7 +762,46 @@ fn draw_agents_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
 
     let is_inst = selected_agent.executable_path.is_some();
 
+    // Quick Command Hint Bar
+    let mut inst_spans = vec![Span::styled("  ", Style::default())];
+    if is_inst {
+        inst_spans.push(Span::styled(
+            " s ",
+            Style::default().fg(Color::Black).bg(color_primary).bold(),
+        ));
+        inst_spans.push(Span::styled(
+            " Modify quota limit  ",
+            Style::default().fg(COLOR_MUTED),
+        ));
+    }
+    inst_spans.push(Span::styled(
+        " ↑↓ ",
+        Style::default().fg(Color::Black).bg(COLOR_DIM).bold(),
+    ));
+    inst_spans.push(Span::styled(
+        " Navigate agents ",
+        Style::default().fg(COLOR_MUTED),
+    ));
+
+    let inst_text = Line::from(inst_spans);
+
+    let inst_para = Paragraph::new(inst_text)
+        .block(
+            Block::default()
+                .borders(Borders::TOP)
+                .border_style(Style::default().fg(COLOR_DIM)),
+        )
+        .alignment(Alignment::Left);
+
     if !is_inst {
+        let card_chunks = Layout::default()
+            .direction(Direction::Vertical)
+            .constraints([
+                Constraint::Min(5),
+                Constraint::Length(2), // Tip/Commands
+            ])
+            .split(chunks[1]);
+
         let card_block = Block::default()
             .borders(Borders::ALL)
             .border_type(BorderType::Rounded)
@@ -773,8 +812,8 @@ fn draw_agents_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
                 Style::default().fg(COLOR_DANGER).bold(),
             ));
 
-        let inner_rect = card_block.inner(chunks[1]);
-        f.render_widget(card_block, chunks[1]);
+        let inner_rect = card_block.inner(card_chunks[0]);
+        f.render_widget(card_block, card_chunks[0]);
 
         let warning_lines = vec![
             Line::from(""),
@@ -805,6 +844,7 @@ fn draw_agents_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
         ];
         let warning_para = Paragraph::new(warning_lines);
         f.render_widget(warning_para, inner_rect);
+        f.render_widget(inst_para, card_chunks[1]);
         return;
     }
 
@@ -1117,28 +1157,6 @@ fn draw_agents_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
     );
     f.render_widget(model_table, detail_chunks[2]);
 
-    // Quick Command Hint Bar
-    let inst_text = Line::from(vec![
-        Span::styled("  ", Style::default()),
-        Span::styled(
-            " s ",
-            Style::default().fg(Color::Black).bg(color_primary).bold(),
-        ),
-        Span::styled(" Modify quota limit  ", Style::default().fg(COLOR_MUTED)),
-        Span::styled(
-            " ↑↓ ",
-            Style::default().fg(Color::Black).bg(COLOR_DIM).bold(),
-        ),
-        Span::styled(" Navigate agents ", Style::default().fg(COLOR_MUTED)),
-    ]);
-
-    let inst_para = Paragraph::new(inst_text)
-        .block(
-            Block::default()
-                .borders(Borders::TOP)
-                .border_style(Style::default().fg(COLOR_DIM)),
-        )
-        .alignment(Alignment::Left);
     f.render_widget(inst_para, detail_chunks[3]);
 }
 
@@ -1424,7 +1442,10 @@ fn draw_quotas_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
                     " s ",
                     Style::default().fg(Color::Black).bg(color_primary).bold(),
                 ));
-                spans.push(Span::styled("  Edit limit   ", Style::default().fg(COLOR_MUTED)));
+                spans.push(Span::styled(
+                    "  Edit limit   ",
+                    Style::default().fg(COLOR_MUTED),
+                ));
             }
 
             spans.push(Span::styled(
@@ -1575,19 +1596,37 @@ fn draw_settings_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
             Style::default().fg(COLOR_MUTED).italic(),
         )),
         Line::from(""),
-        Line::from(vec![
-            Span::styled("  ", Style::default()),
-            Span::styled(
-                " ↑↓ ",
-                Style::default().fg(Color::Black).bg(COLOR_DIM).bold(),
-            ),
-            Span::styled("  Select   ", Style::default().fg(COLOR_MUTED)),
-            Span::styled(
-                " Enter / +/- ",
-                Style::default().fg(Color::Black).bg(COLOR_DIM).bold(),
-            ),
-            Span::styled("  Cycle value", Style::default().fg(COLOR_MUTED)),
-        ]),
+        Line::from({
+            let mut spans = vec![
+                Span::styled("  ", Style::default()),
+                Span::styled(
+                    " ↑↓ ",
+                    Style::default().fg(Color::Black).bg(COLOR_DIM).bold(),
+                ),
+                Span::styled("  Select   ", Style::default().fg(COLOR_MUTED)),
+            ];
+
+            if ctx.selected_setting_idx == 4 {
+                spans.push(Span::styled(
+                    " Enter / e ",
+                    Style::default().fg(Color::Black).bg(COLOR_DIM).bold(),
+                ));
+                spans.push(Span::styled(
+                    "  Open editor",
+                    Style::default().fg(COLOR_MUTED),
+                ));
+            } else {
+                spans.push(Span::styled(
+                    " Enter / +/- ",
+                    Style::default().fg(Color::Black).bg(COLOR_DIM).bold(),
+                ));
+                spans.push(Span::styled(
+                    "  Cycle value",
+                    Style::default().fg(COLOR_MUTED),
+                ));
+            }
+            spans
+        }),
     ];
 
     let path_para = Paragraph::new(path_lines).block(

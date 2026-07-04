@@ -9,3 +9,6 @@
 ## 2024-05-25 - Prevent overriding global keybinds with contextual ones
 **Learning:** Terminal applications can easily break the user's mental model if contextual keybinds (like changing a setting's value with left/right arrows) accidentally override a global navigation pattern (like changing tabs with left/right arrows), causing them to get "stuck" or perform unintended actions.
 **Action:** Do not override global keybinds with contextual/local inputs unless you've implemented an explicit modal, form, or "edit mode" to clearly switch input scopes.
+## 2026-07-04 - Improve keyboard navigation discoverability and accurate keybinds
+**Learning:** Terminal applications with hidden keybinds lead to user confusion. Incorrect keybind hints lead to frustration when standard controls map to unexpected actions. Context-aware hints improve UX by preventing users from attempting invalid actions.
+**Action:** Always expose available hotkeys in titles. Double-check input logic vs instructional text, and dynamically hide hints for unavailable actions.
