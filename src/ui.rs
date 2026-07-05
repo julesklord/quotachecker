@@ -1418,7 +1418,7 @@ fn draw_quotas_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
             let mut spans = vec![
                 Span::styled("  ", Style::default()),
                 Span::styled(
-                    " Tab ",
+                    " Tab/←→ ",
                     Style::default().fg(Color::Black).bg(COLOR_DIM).bold(),
                 ),
                 Span::styled("  Change screen   ", Style::default().fg(COLOR_MUTED)),
@@ -1588,19 +1588,32 @@ fn draw_settings_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
             Style::default().fg(COLOR_MUTED).italic(),
         )),
         Line::from(""),
-        Line::from(vec![
-            Span::styled("  ", Style::default()),
-            Span::styled(
-                " ↑↓ ",
-                Style::default().fg(Color::Black).bg(COLOR_DIM).bold(),
-            ),
-            Span::styled("  Select   ", Style::default().fg(COLOR_MUTED)),
-            Span::styled(
-                " Enter / +/- ",
-                Style::default().fg(Color::Black).bg(COLOR_DIM).bold(),
-            ),
-            Span::styled("  Cycle value", Style::default().fg(COLOR_MUTED)),
-        ]),
+        Line::from({
+            let mut spans = vec![
+                Span::styled("  ", Style::default()),
+                Span::styled(
+                    " ↑↓ ",
+                    Style::default().fg(Color::Black).bg(COLOR_DIM).bold(),
+                ),
+                Span::styled("  Select   ", Style::default().fg(COLOR_MUTED)),
+            ];
+
+            if ctx.selected_setting_idx == 4 {
+                spans.push(Span::styled(
+                    " Enter / e ",
+                    Style::default().fg(Color::Black).bg(COLOR_DIM).bold(),
+                ));
+                spans.push(Span::styled("  Open editor", Style::default().fg(COLOR_MUTED)));
+            } else {
+                spans.push(Span::styled(
+                    " Enter / +/- ",
+                    Style::default().fg(Color::Black).bg(COLOR_DIM).bold(),
+                ));
+                spans.push(Span::styled("  Cycle value", Style::default().fg(COLOR_MUTED)));
+            }
+
+            spans
+        }),
     ];
 
     let path_para = Paragraph::new(path_lines).block(
@@ -1636,7 +1649,8 @@ fn draw_footer(f: &mut Frame, area: Rect, ctx: &RenderContext) {
     // Common keybinds
     let mut footer_spans: Vec<Span> = Vec::new();
     footer_spans.extend(kpill("q", "Quit", COLOR_DANGER));
-    footer_spans.extend(kpill("Tab", "Switch tab", COLOR_DIM));
+    footer_spans.extend(kpill("Tab/←→", "Switch tab", COLOR_DIM));
+    footer_spans.extend(kpill("r", "Force refresh", color_primary));
 
     // Tab-specific
     match ctx.active_tab {
@@ -1654,9 +1668,7 @@ fn draw_footer(f: &mut Frame, area: Rect, ctx: &RenderContext) {
                 footer_spans.extend(kpill("Enter/+/-", "Cycle value", color_primary));
             }
         }
-        _ => {
-            footer_spans.extend(kpill("r", "Force refresh", color_primary));
-        }
+        _ => {}
     }
 
     // Version / right side
