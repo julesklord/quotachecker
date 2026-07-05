@@ -1118,19 +1118,29 @@ fn draw_agents_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
     f.render_widget(model_table, detail_chunks[2]);
 
     // Quick Command Hint Bar
-    let inst_text = Line::from(vec![
-        Span::styled("  ", Style::default()),
-        Span::styled(
+    let mut hint_spans = vec![Span::styled("  ", Style::default())];
+
+    if selected_agent.executable_path.is_some() {
+        hint_spans.push(Span::styled(
             " s ",
             Style::default().fg(Color::Black).bg(color_primary).bold(),
-        ),
-        Span::styled(" Modify quota limit  ", Style::default().fg(COLOR_MUTED)),
-        Span::styled(
-            " ↑↓ ",
-            Style::default().fg(Color::Black).bg(COLOR_DIM).bold(),
-        ),
-        Span::styled(" Navigate agents ", Style::default().fg(COLOR_MUTED)),
-    ]);
+        ));
+        hint_spans.push(Span::styled(
+            " Modify quota limit  ",
+            Style::default().fg(COLOR_MUTED),
+        ));
+    }
+
+    hint_spans.push(Span::styled(
+        " ↑↓ ",
+        Style::default().fg(Color::Black).bg(COLOR_DIM).bold(),
+    ));
+    hint_spans.push(Span::styled(
+        " Navigate agents ",
+        Style::default().fg(COLOR_MUTED),
+    ));
+
+    let inst_text = Line::from(hint_spans);
 
     let inst_para = Paragraph::new(inst_text)
         .block(
@@ -1424,7 +1434,10 @@ fn draw_quotas_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
                     " s ",
                     Style::default().fg(Color::Black).bg(color_primary).bold(),
                 ));
-                spans.push(Span::styled("  Edit limit   ", Style::default().fg(COLOR_MUTED)));
+                spans.push(Span::styled(
+                    "  Edit limit   ",
+                    Style::default().fg(COLOR_MUTED),
+                ));
             }
 
             spans.push(Span::styled(

@@ -9,6 +9,11 @@
 ## 2024-05-25 - Prevent overriding global keybinds with contextual ones
 **Learning:** Terminal applications can easily break the user's mental model if contextual keybinds (like changing a setting's value with left/right arrows) accidentally override a global navigation pattern (like changing tabs with left/right arrows), causing them to get "stuck" or perform unintended actions.
 **Action:** Do not override global keybinds with contextual/local inputs unless you've implemented an explicit modal, form, or "edit mode" to clearly switch input scopes.
+
+## 2025-07-02 - Hide unavailable context keybinds
+**Learning:** In a TUI, context keybinds that show up for uninstalled agents confuse the user.
+**Action:** Always dynamically hide keybind hints that prompt users for unavailable actions (like editing quota for uninstalled agent).
+
 ## 2024-05-19 - Improved keybind discoverability
 **Learning:** Hardcoding generic static hints for a TUI's footer can lead to confusing scenarios when the available actions are highly context-dependent (like navigating different settings). Arrow keys are common TUI patterns, but without explicit string hints (e.g., `Tab/←→`), users might not discover them intuitively.
 **Action:** Always conditionally render keybind hints in a TUI to accurately reflect the true available actions for the current selected state/index, and use explicit combined string formats to highlight alternative navigation methods.
