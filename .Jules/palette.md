@@ -17,3 +17,6 @@
 ## 2024-05-19 - Improved keybind discoverability
 **Learning:** Hardcoding generic static hints for a TUI's footer can lead to confusing scenarios when the available actions are highly context-dependent (like navigating different settings). Arrow keys are common TUI patterns, but without explicit string hints (e.g., `Tab/←→`), users might not discover them intuitively.
 **Action:** Always conditionally render keybind hints in a TUI to accurately reflect the true available actions for the current selected state/index, and use explicit combined string formats to highlight alternative navigation methods.
+## 2026-07-06 - Hide unavailable context keybinds for unlimited agents
+**Learning:** In a TUI, context keybinds that show up for uneditable actions confuse the user. I discovered this issue with the 'Unlimited' quota type, where the edit keybind 's' was still visible even though the quota cannot be modified.
+**Action:** Always dynamically hide keybind hints that prompt users for unavailable actions (like editing quota for unlimited agents). Ensure backend logic also safely rejects the action with a clear message.
