@@ -923,7 +923,7 @@ fn draw_agents_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
         )
         .label(
             if selected_agent.quota_type == crate::agent::QuotaType::Unlimited {
-                "Uso Local Ilimitado".to_string()
+                "Unlimited Local Usage".to_string()
             } else {
                 format!(
                     "{}/{} Requests Used ({:.1}%)",
@@ -960,7 +960,7 @@ fn draw_agents_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
         )
         .label(
             if selected_agent.quota_type == crate::agent::QuotaType::Unlimited {
-                "Uso Local Ilimitado".to_string()
+                "Unlimited Local Usage".to_string()
             } else {
                 format!(
                     "{} Requests Remaining ({:.1}%)",
@@ -1120,7 +1120,9 @@ fn draw_agents_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
     // Quick Command Hint Bar
     let mut hint_spans = vec![Span::styled("  ", Style::default())];
 
-    if selected_agent.executable_path.is_some() {
+    if selected_agent.executable_path.is_some()
+        && selected_agent.quota_type != crate::agent::QuotaType::Unlimited
+    {
         hint_spans.push(Span::styled(
             " s ",
             Style::default().fg(Color::Black).bg(color_primary).bold(),
@@ -1302,7 +1304,11 @@ fn draw_quotas_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
         let agent_color = get_agent_color(agent.id);
 
         let action_cell = if is_inst {
-            Cell::new("Modify (s)").style(Style::default().fg(color_primary).italic())
+            if agent.quota_type == crate::agent::QuotaType::Unlimited {
+                Cell::new("N/A - Unlimited").style(Style::default().fg(COLOR_MUTED).italic())
+            } else {
+                Cell::new("Modify (s)").style(Style::default().fg(color_primary).italic())
+            }
         } else {
             Cell::new("N/A - Telemetry Omitted").style(Style::default().fg(COLOR_MUTED))
         };
@@ -1429,7 +1435,10 @@ fn draw_quotas_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
                 Span::styled("  Select agent   ", Style::default().fg(COLOR_MUTED)),
             ];
 
-            if ctx.agents[ctx.selected_agent_idx].executable_path.is_some() {
+            if ctx.agents[ctx.selected_agent_idx].executable_path.is_some()
+                && ctx.agents[ctx.selected_agent_idx].quota_type
+                    != crate::agent::QuotaType::Unlimited
+            {
                 spans.push(Span::styled(
                     " s ",
                     Style::default().fg(Color::Black).bg(color_primary).bold(),
@@ -1603,13 +1612,19 @@ fn draw_settings_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
                     " Enter / e ",
                     Style::default().fg(Color::Black).bg(COLOR_DIM).bold(),
                 ));
-                spans.push(Span::styled("  Open editor", Style::default().fg(COLOR_MUTED)));
+                spans.push(Span::styled(
+                    "  Open editor",
+                    Style::default().fg(COLOR_MUTED),
+                ));
             } else {
                 spans.push(Span::styled(
                     " Enter / +/- ",
                     Style::default().fg(Color::Black).bg(COLOR_DIM).bold(),
                 ));
-                spans.push(Span::styled("  Cycle value", Style::default().fg(COLOR_MUTED)));
+                spans.push(Span::styled(
+                    "  Cycle value",
+                    Style::default().fg(COLOR_MUTED),
+                ));
             }
 
             spans
@@ -1656,7 +1671,10 @@ fn draw_footer(f: &mut Frame, area: Rect, ctx: &RenderContext) {
     match ctx.active_tab {
         1 | 3 => {
             footer_spans.extend(kpill("↑↓", "Select agent", COLOR_DIM));
-            if ctx.agents[ctx.selected_agent_idx].executable_path.is_some() {
+            if ctx.agents[ctx.selected_agent_idx].executable_path.is_some()
+                && ctx.agents[ctx.selected_agent_idx].quota_type
+                    != crate::agent::QuotaType::Unlimited
+            {
                 footer_spans.extend(kpill("s", "Edit quota", color_primary));
             }
         }
