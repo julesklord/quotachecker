@@ -1193,24 +1193,18 @@ fn draw_sessions_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
         let agent_color = get_agent_color(agent.id);
 
         if agent.sessions_count > 0 {
-            for idx in 0..agent.sessions_count.min(5) {
-                let session_id = format!("{:x}", 1395819581293u64 + idx as u64);
-                rows.push(Row::new(vec![
-                    Cell::new(format!("  {}", agent.name))
-                        .style(Style::default().fg(agent_color).bold()),
-                    Cell::new(format!("#{}", &session_id[..8]))
-                        .style(Style::default().fg(COLOR_INFO)),
-                    Cell::new(format!("{}m ago", idx * 10 + 5))
-                        .style(Style::default().fg(COLOR_MUTED)),
-                    Cell::new(" ✔ OK ")
-                        .style(Style::default().fg(Color::Black).bg(COLOR_SUCCESS).bold()),
-                    Cell::new(format!(
-                        "{} reqs",
-                        agent.requests_count / agent.sessions_count
-                    ))
+            rows.push(Row::new(vec![
+                Cell::new(format!("  {}", agent.name))
+                    .style(Style::default().fg(agent_color).bold()),
+                Cell::new("Aggregate")
+                    .style(Style::default().fg(COLOR_INFO).italic()),
+                Cell::new("-")
+                    .style(Style::default().fg(COLOR_MUTED)),
+                Cell::new(" ✔ OK ")
+                    .style(Style::default().fg(Color::Black).bg(COLOR_SUCCESS).bold()),
+                Cell::new(format!("{} reqs", agent.requests_count))
                     .style(Style::default().fg(COLOR_TEXT)),
-                ]));
-            }
+            ]));
         }
     }
 
