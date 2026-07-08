@@ -20,3 +20,9 @@
 ## 2026-07-06 - Hide unavailable context keybinds for unlimited agents
 **Learning:** In a TUI, context keybinds that show up for uneditable actions confuse the user. I discovered this issue with the 'Unlimited' quota type, where the edit keybind 's' was still visible even though the quota cannot be modified.
 **Action:** Always dynamically hide keybind hints that prompt users for unavailable actions (like editing quota for unlimited agents). Ensure backend logic also safely rejects the action with a clear message.
+## 2026-07-06 - Missing empty state for tables without rows
+**Learning:** Tables in  UI that lack an empty state fallback will render with only headers and a blank body if their backing dataset is empty, causing visual inconsistency and confusion. I encountered this with the model breakdown table in  when no models were available.
+**Action:** Always wrap table rendering in an  conditional check. Render a dedicated  with styled copy to clarify the empty state when no data exists.
+## 2026-07-06 - Missing empty state for tables without rows
+**Learning:** Tables in ratatui UI that lack an empty state fallback will render with only headers and a blank body if their backing dataset is empty, causing visual inconsistency and confusion. I encountered this with the model breakdown table in draw_agents_tab when no models were available.
+**Action:** Always wrap table rendering in an .is_empty() conditional check. Render a dedicated Paragraph with styled copy to clarify the empty state when no data exists.

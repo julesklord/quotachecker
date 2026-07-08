@@ -1085,37 +1085,64 @@ fn draw_agents_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
         ]));
     }
 
-    let model_table = Table::new(
-        model_rows,
-        [
-            Constraint::Percentage(36),
-            Constraint::Percentage(24),
-            Constraint::Percentage(12),
-            Constraint::Percentage(28),
-        ],
-    )
-    .header(
-        Row::new(vec!["  Model", "Usage / Limit", "Used %", "Progress"])
-            .style(
-                Style::default()
-                    .fg(color_primary)
-                    .bold()
-                    .add_modifier(Modifier::UNDERLINED),
-            )
-            .bottom_margin(1),
-    )
-    .block(
-        Block::default()
-            .borders(Borders::ALL)
-            .border_type(BorderType::Rounded)
-            .border_style(Style::default().fg(COLOR_MUTED))
-            .bg(COLOR_CARD)
-            .title(Span::styled(
-                " ▦ MODEL-LEVEL BREAKDOWN ",
-                Style::default().fg(COLOR_MUTED).bold(),
+    if model_rows.is_empty() {
+        let empty_state_p = Paragraph::new(vec![
+            Line::from(""),
+            Line::from(Span::styled(
+                "◌  No models found",
+                Style::default().fg(COLOR_MUTED).italic(),
             )),
-    );
-    f.render_widget(model_table, detail_chunks[2]);
+            Line::from(Span::styled(
+                "No model usage telemetry available for this agent.",
+                Style::default().fg(COLOR_DIM).italic(),
+            )),
+        ])
+        .alignment(Alignment::Center)
+        .block(
+            Block::default()
+                .borders(Borders::ALL)
+                .border_type(BorderType::Rounded)
+                .border_style(Style::default().fg(COLOR_MUTED))
+                .bg(COLOR_CARD)
+                .title(Span::styled(
+                    " ▦ MODEL-LEVEL BREAKDOWN ",
+                    Style::default().fg(COLOR_MUTED).bold(),
+                )),
+        );
+        f.render_widget(empty_state_p, detail_chunks[2]);
+    } else {
+        let model_table = Table::new(
+            model_rows,
+            [
+                Constraint::Percentage(36),
+                Constraint::Percentage(24),
+                Constraint::Percentage(12),
+                Constraint::Percentage(28),
+            ],
+        )
+        .header(
+            Row::new(vec!["  Model", "Usage / Limit", "Used %", "Progress"])
+                .style(
+                    Style::default()
+                        .fg(color_primary)
+                        .bold()
+                        .add_modifier(Modifier::UNDERLINED),
+                )
+                .bottom_margin(1),
+        )
+        .block(
+            Block::default()
+                .borders(Borders::ALL)
+                .border_type(BorderType::Rounded)
+                .border_style(Style::default().fg(COLOR_MUTED))
+                .bg(COLOR_CARD)
+                .title(Span::styled(
+                    " ▦ MODEL-LEVEL BREAKDOWN ",
+                    Style::default().fg(COLOR_MUTED).bold(),
+                )),
+        );
+        f.render_widget(model_table, detail_chunks[2]);
+    }
 
     // Quick Command Hint Bar
     let mut hint_spans = vec![Span::styled("  ", Style::default())];
