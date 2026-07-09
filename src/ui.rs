@@ -1266,10 +1266,10 @@ fn draw_sessions_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
             rows,
             [
                 Constraint::Percentage(18),
-                Constraint::Percentage(22),
+                Constraint::Percentage(26),
                 Constraint::Percentage(18),
                 Constraint::Percentage(14),
-                Constraint::Percentage(18),
+                Constraint::Percentage(24),
             ],
         )
         .header(
@@ -1684,30 +1684,36 @@ fn draw_footer(f: &mut Frame, area: Rect, ctx: &RenderContext) {
 
     // Common keybinds
     let mut footer_spans: Vec<Span> = Vec::new();
-    footer_spans.extend(kpill("q", "Quit", COLOR_DANGER));
-    footer_spans.extend(kpill("Tab/←→", "Switch tab", COLOR_DIM));
-    footer_spans.extend(kpill("r", "Force refresh", color_primary));
 
-    // Tab-specific
-    match ctx.active_tab {
-        1 | 3 => {
-            footer_spans.extend(kpill("↑↓", "Select agent", COLOR_DIM));
-            if ctx.agents[ctx.selected_agent_idx].executable_path.is_some()
-                && ctx.agents[ctx.selected_agent_idx].quota_type
-                    != crate::agent::QuotaType::Unlimited
-            {
-                footer_spans.extend(kpill("s", "Edit quota", color_primary));
+    if ctx.show_budget_modal {
+        footer_spans.extend(kpill("Enter", "Save", color_primary));
+        footer_spans.extend(kpill("Esc", "Cancel", COLOR_DIM));
+    } else {
+        footer_spans.extend(kpill("q", "Quit", COLOR_DANGER));
+        footer_spans.extend(kpill("Tab/←→", "Switch tab", COLOR_DIM));
+        footer_spans.extend(kpill("r", "Force refresh", color_primary));
+
+        // Tab-specific
+        match ctx.active_tab {
+            1 | 3 => {
+                footer_spans.extend(kpill("↑↓", "Select agent", COLOR_DIM));
+                if ctx.agents[ctx.selected_agent_idx].executable_path.is_some()
+                    && ctx.agents[ctx.selected_agent_idx].quota_type
+                        != crate::agent::QuotaType::Unlimited
+                {
+                    footer_spans.extend(kpill("s", "Edit quota", color_primary));
+                }
             }
-        }
-        4 => {
-            footer_spans.extend(kpill("↑↓", "Select", COLOR_DIM));
-            if ctx.selected_setting_idx == 4 {
-                footer_spans.extend(kpill("Enter", "Open editor", color_primary));
-            } else {
-                footer_spans.extend(kpill("Enter/+/-", "Cycle value", color_primary));
+            4 => {
+                footer_spans.extend(kpill("↑↓", "Select", COLOR_DIM));
+                if ctx.selected_setting_idx == 4 {
+                    footer_spans.extend(kpill("Enter", "Open editor", color_primary));
+                } else {
+                    footer_spans.extend(kpill("Enter/+/-", "Cycle value", color_primary));
+                }
             }
+            _ => {}
         }
-        _ => {}
     }
 
     // Version / right side
@@ -1833,7 +1839,13 @@ fn draw_budget_modal(f: &mut Frame, area: Rect, ctx: &RenderContext) {
     f.render_widget(label_p, row_chunks[0]);
     f.render_widget(val_p, row_chunks[1]);
 
-    if !is_valid || display_val.is_empty() {
+    if display_val.is_empty() {
+        let hint_p = Paragraph::new(Line::from(Span::styled(
+            " ℹ Please enter a numeric limit",
+            Style::default().fg(COLOR_MUTED).italic(),
+        )));
+        f.render_widget(hint_p, form_layout[3]);
+    } else if !is_valid {
         let warning_p = Paragraph::new(Line::from(Span::styled(
             " ⚠ Valid number required",
             Style::default().fg(COLOR_DANGER).italic(),
