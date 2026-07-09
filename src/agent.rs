@@ -131,12 +131,19 @@ fn get_cached_executable(cmd: &str) -> Option<String> {
 }
 
 fn get_cached_version(executable: &str) -> Option<String> {
-    static CACHE: OnceLock<Mutex<HashMap<String, Option<String>>>> = OnceLock::new();
-    let map_mutex = CACHE.get_or_init(|| Mutex::new(HashMap::new()));
-    let mut map = map_mutex.lock().unwrap();
-    map.entry(executable.to_string())
-        .or_insert_with(|| AgentScanner::get_version(executable))
-        .clone()
+    #[cfg(test)]
+    {
+        return AgentScanner::get_version(executable);
+    }
+    #[cfg(not(test))]
+    {
+        static CACHE: OnceLock<Mutex<HashMap<String, Option<String>>>> = OnceLock::new();
+        let map_mutex = CACHE.get_or_init(|| Mutex::new(HashMap::new()));
+        let mut map = map_mutex.lock().unwrap();
+        map.entry(executable.to_string())
+            .or_insert_with(|| AgentScanner::get_version(executable))
+            .clone()
+    }
 }
 
 pub(crate) fn seconds_until_weekly_reset() -> i64 {
@@ -1524,10 +1531,14 @@ mod tests {
     use std::fs;
     use std::os::unix::fs::PermissionsExt;
     use std::path::PathBuf;
+    use std::sync::atomic::{AtomicUsize, Ordering};
+
+    static MOCK_ID: AtomicUsize = AtomicUsize::new(0);
 
     fn create_mock_executable(name: &str, script_content: &str) -> PathBuf {
         let dir = std::env::temp_dir();
-        let path = dir.join(name);
+        let id = MOCK_ID.fetch_add(1, Ordering::SeqCst);
+        let path = dir.join(format!("{}_{}", name, id));
         fs::write(&path, script_content).unwrap();
         let mut perms = fs::metadata(&path).unwrap().permissions();
         perms.set_mode(0o755);

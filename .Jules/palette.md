@@ -26,3 +26,15 @@
 ## 2026-07-06 - Missing empty state for tables without rows
 **Learning:** Tables in ratatui UI that lack an empty state fallback will render with only headers and a blank body if their backing dataset is empty, causing visual inconsistency and confusion. I encountered this with the model breakdown table in draw_agents_tab when no models were available.
 **Action:** Always wrap table rendering in an .is_empty() conditional check. Render a dedicated Paragraph with styled copy to clarify the empty state when no data exists.
+
+## 2026-07-06 - Modal contextual footer keybinds
+**Learning:** If a global TUI footer displays keybinds like `q` for Quit or `Tab` for switching screens, but an interactive modal is currently active on top, users get confused when those global keys are ignored by the modal's event handler.
+**Action:** Always conditionally render keybind hints in the global footer based on whether a modal is active. If a modal is shown, only display the modal's specific keybinds (like `Esc` to cancel, `Enter` to save).
+
+## 2026-07-06 - Empty vs invalid form input states
+**Learning:** Displaying a bright red error message (e.g., "⚠ Valid number required") when an input field is simply empty (like right after backspacing) is overly aggressive and creates negative user sentiment.
+**Action:** Differentiate between empty state and invalid state in forms. Use a neutral, helpful hint (e.g., "ℹ Please enter a numeric limit") when the input is empty, and reserve the red error for actual invalid formats.
+
+## 2026-07-06 - Table column percentages
+**Learning:** Ratatui `Table` components with `Constraint::Percentage` columns that sum to less than 100% (e.g., 90%) leave an awkward, unstyled blank space on the right edge of the terminal.
+**Action:** When using percentage constraints for a full-width table, ensure the percentages sum to exactly 100%.
