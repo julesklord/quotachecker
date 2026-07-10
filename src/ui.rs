@@ -1812,7 +1812,7 @@ fn draw_budget_modal(f: &mut Frame, area: Rect, ctx: &RenderContext) {
     )));
     let (border_color, text_style, display_text) = if display_val.is_empty() {
         (
-            COLOR_DANGER,
+            COLOR_MUTED,
             Style::default().fg(COLOR_DIM),
             format!("Enter limit...{}", cursor_suffix),
         )

@@ -38,3 +38,7 @@
 ## 2026-07-06 - Table column percentages
 **Learning:** Ratatui `Table` components with `Constraint::Percentage` columns that sum to less than 100% (e.g., 90%) leave an awkward, unstyled blank space on the right edge of the terminal.
 **Action:** When using percentage constraints for a full-width table, ensure the percentages sum to exactly 100%.
+
+## 2024-07-10 - Differentiate between empty state and invalid state in forms
+**Learning:** Displaying a bright red error message or border when an input field is simply empty (like right after backspacing or initial opening) is overly aggressive and creates negative user sentiment. It incorrectly flags an incomplete action as an error.
+**Action:** Differentiate between empty state and invalid state in forms. Use a neutral, helpful hint (e.g., `COLOR_MUTED` border) when the input is empty, and reserve the red error (`COLOR_DANGER`) for actual invalid formats or limits.
