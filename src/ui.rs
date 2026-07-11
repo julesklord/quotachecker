@@ -1223,10 +1223,8 @@ fn draw_sessions_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
             rows.push(Row::new(vec![
                 Cell::new(format!("  {}", agent.name))
                     .style(Style::default().fg(agent_color).bold()),
-                Cell::new("Aggregate")
-                    .style(Style::default().fg(COLOR_INFO).italic()),
-                Cell::new("-")
-                    .style(Style::default().fg(COLOR_MUTED)),
+                Cell::new("Aggregate").style(Style::default().fg(COLOR_INFO).italic()),
+                Cell::new("-").style(Style::default().fg(COLOR_MUTED)),
                 Cell::new(" ✔ OK ")
                     .style(Style::default().fg(Color::Black).bg(COLOR_SUCCESS).bold()),
                 Cell::new(format!("{} reqs", agent.requests_count))

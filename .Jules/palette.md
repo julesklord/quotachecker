@@ -42,3 +42,6 @@
 ## 2024-07-10 - Differentiate between empty state and invalid state in forms
 **Learning:** Displaying a bright red error message or border when an input field is simply empty (like right after backspacing or initial opening) is overly aggressive and creates negative user sentiment. It incorrectly flags an incomplete action as an error.
 **Action:** Differentiate between empty state and invalid state in forms. Use a neutral, helpful hint (e.g., `COLOR_MUTED` border) when the input is empty, and reserve the red error (`COLOR_DANGER`) for actual invalid formats or limits.
+## 2024-05-27 - Prevent global keybind overriding
+**Learning:** In terminal applications, users get easily confused when they use an action keybind (like `s` to edit a setting) in a view where that action is completely invalid (like an overview tab), especially if the action is secretly bound globally but only meant to be used contextually.
+**Action:** Always ensure action keybindings are strictly scoped to the tabs or views where they are valid, matching the dynamically rendered keybind hints.

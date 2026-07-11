@@ -488,7 +488,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
                         // Open Editor
                         KeyCode::Char('s') => {
-                            if app.active_tab != 4 {
+                            if app.active_tab == 1 || app.active_tab == 3 {
                                 app.open_budget_modal();
                             }
                         }
