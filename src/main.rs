@@ -108,6 +108,14 @@ impl App {
             return;
         }
 
+        if agent.quota_type == crate::agent::QuotaType::Unlimited {
+            self.add_log(format!(
+                "Cannot edit quota limit for agent with Unlimited quota: {}",
+                agent.name
+            ));
+            return;
+        }
+
         self.editing_limit = agent.quota_limit;
         self.editing_value = self.editing_limit.to_string();
         self.show_budget_modal = true;
@@ -480,7 +488,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
                         // Open Editor
                         KeyCode::Char('s') => {
-                            if app.active_tab != 4 {
+                            if app.active_tab == 1 || app.active_tab == 3 {
                                 app.open_budget_modal();
                             }
                         }

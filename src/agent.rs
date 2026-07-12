@@ -131,12 +131,19 @@ fn get_cached_executable(cmd: &str) -> Option<String> {
 }
 
 fn get_cached_version(executable: &str) -> Option<String> {
-    static CACHE: OnceLock<Mutex<HashMap<String, Option<String>>>> = OnceLock::new();
-    let map_mutex = CACHE.get_or_init(|| Mutex::new(HashMap::new()));
-    let mut map = map_mutex.lock().unwrap();
-    map.entry(executable.to_string())
-        .or_insert_with(|| AgentScanner::get_version(executable))
-        .clone()
+    #[cfg(test)]
+    {
+        return AgentScanner::get_version(executable);
+    }
+    #[cfg(not(test))]
+    {
+        static CACHE: OnceLock<Mutex<HashMap<String, Option<String>>>> = OnceLock::new();
+        let map_mutex = CACHE.get_or_init(|| Mutex::new(HashMap::new()));
+        let mut map = map_mutex.lock().unwrap();
+        map.entry(executable.to_string())
+            .or_insert_with(|| AgentScanner::get_version(executable))
+            .clone()
+    }
 }
 
 pub(crate) fn seconds_until_weekly_reset() -> i64 {
@@ -1211,13 +1218,29 @@ impl AgentScanner {
             None
         };
         let aider_installed = aider_exe.is_some();
-        let aider_tier = if aider_installed { UserTier::LocalFree } else { UserTier::NotInstalled };
-        let aider_limit = if config.aider_quota.custom { config.aider_quota.limit } else { 200 };
+        let aider_tier = if aider_installed {
+            UserTier::LocalFree
+        } else {
+            UserTier::NotInstalled
+        };
+        let aider_limit = if config.aider_quota.custom {
+            config.aider_quota.limit
+        } else {
+            200
+        };
         let aider_used = if aider_installed { 15 } else { 0 };
         let aider_rem = aider_limit.saturating_sub(aider_used);
         let aider_model_usages = vec![
-            ModelUsage { name: "claude-3-5-sonnet".to_string(), requests_used: (aider_used as f64 * 0.6) as u32, limit: (aider_limit as f64 * 0.6) as u32 },
-            ModelUsage { name: "gpt-4o".to_string(), requests_used: (aider_used as f64 * 0.4) as u32, limit: (aider_limit as f64 * 0.4) as u32 },
+            ModelUsage {
+                name: "claude-3-5-sonnet".to_string(),
+                requests_used: (aider_used as f64 * 0.6) as u32,
+                limit: (aider_limit as f64 * 0.6) as u32,
+            },
+            ModelUsage {
+                name: "gpt-4o".to_string(),
+                requests_used: (aider_used as f64 * 0.4) as u32,
+                limit: (aider_limit as f64 * 0.4) as u32,
+            },
         ];
         agents.push(AgentState {
             id: AgentId::Aider,
@@ -1226,13 +1249,21 @@ impl AgentScanner {
             version: aider_ver,
             config_path: aider_config_str,
             is_authenticated: aider_installed,
-            auth_info: if aider_installed { "API Key".to_string() } else { "Not Configured".to_string() },
+            auth_info: if aider_installed {
+                "API Key".to_string()
+            } else {
+                "Not Configured".to_string()
+            },
             quota_type: QuotaType::Daily,
             user_tier: aider_tier,
             quota_used: aider_used,
             quota_limit: aider_limit,
             quota_remaining: aider_rem,
-            seconds_until_reset: if aider_installed { seconds_until_daily_reset() } else { 0 },
+            seconds_until_reset: if aider_installed {
+                seconds_until_daily_reset()
+            } else {
+                0
+            },
             sessions_count: if aider_installed { 2 } else { 0 },
             requests_count: aider_used,
             tokens_used: if aider_installed { Some(25000) } else { None },
@@ -1252,13 +1283,29 @@ impl AgentScanner {
             None
         };
         let ollama_installed = ollama_exe.is_some();
-        let ollama_tier = if ollama_installed { UserTier::LocalFree } else { UserTier::NotInstalled };
-        let ollama_limit = if config.ollama_quota.custom { config.ollama_quota.limit } else { 1000 };
+        let ollama_tier = if ollama_installed {
+            UserTier::LocalFree
+        } else {
+            UserTier::NotInstalled
+        };
+        let ollama_limit = if config.ollama_quota.custom {
+            config.ollama_quota.limit
+        } else {
+            1000
+        };
         let ollama_used = if ollama_installed { 120 } else { 0 };
         let ollama_rem = ollama_limit.saturating_sub(ollama_used);
         let ollama_model_usages = vec![
-            ModelUsage { name: "llama3".to_string(), requests_used: (ollama_used as f64 * 0.7) as u32, limit: (ollama_limit as f64 * 0.7) as u32 },
-            ModelUsage { name: "mistral".to_string(), requests_used: (ollama_used as f64 * 0.3) as u32, limit: (ollama_limit as f64 * 0.3) as u32 },
+            ModelUsage {
+                name: "llama3".to_string(),
+                requests_used: (ollama_used as f64 * 0.7) as u32,
+                limit: (ollama_limit as f64 * 0.7) as u32,
+            },
+            ModelUsage {
+                name: "mistral".to_string(),
+                requests_used: (ollama_used as f64 * 0.3) as u32,
+                limit: (ollama_limit as f64 * 0.3) as u32,
+            },
         ];
         agents.push(AgentState {
             id: AgentId::Ollama,
@@ -1267,7 +1314,11 @@ impl AgentScanner {
             version: ollama_ver,
             config_path: ollama_config_str,
             is_authenticated: ollama_installed,
-            auth_info: if ollama_installed { "Localhost".to_string() } else { "Not Configured".to_string() },
+            auth_info: if ollama_installed {
+                "Localhost".to_string()
+            } else {
+                "Not Configured".to_string()
+            },
             quota_type: QuotaType::Unlimited,
             user_tier: ollama_tier,
             quota_used: ollama_used,
@@ -1276,7 +1327,11 @@ impl AgentScanner {
             seconds_until_reset: 0,
             sessions_count: if ollama_installed { 5 } else { 0 },
             requests_count: ollama_used,
-            tokens_used: if ollama_installed { Some(180_000) } else { None },
+            tokens_used: if ollama_installed {
+                Some(180_000)
+            } else {
+                None
+            },
             cost_usd: Some(0.0),
             model_usages: ollama_model_usages,
         });
@@ -1293,13 +1348,29 @@ impl AgentScanner {
             None
         };
         let continue_installed = continue_exe.is_some();
-        let continue_tier = if continue_installed { UserTier::LocalFree } else { UserTier::NotInstalled };
-        let continue_limit = if config.continue_quota.custom { config.continue_quota.limit } else { 500 };
+        let continue_tier = if continue_installed {
+            UserTier::LocalFree
+        } else {
+            UserTier::NotInstalled
+        };
+        let continue_limit = if config.continue_quota.custom {
+            config.continue_quota.limit
+        } else {
+            500
+        };
         let continue_used = if continue_installed { 45 } else { 0 };
         let continue_rem = continue_limit.saturating_sub(continue_used);
         let continue_model_usages = vec![
-            ModelUsage { name: "gpt-4o-mini".to_string(), requests_used: (continue_used as f64 * 0.8) as u32, limit: (continue_limit as f64 * 0.8) as u32 },
-            ModelUsage { name: "claude-3-5-sonnet".to_string(), requests_used: (continue_used as f64 * 0.2) as u32, limit: (continue_limit as f64 * 0.2) as u32 },
+            ModelUsage {
+                name: "gpt-4o-mini".to_string(),
+                requests_used: (continue_used as f64 * 0.8) as u32,
+                limit: (continue_limit as f64 * 0.8) as u32,
+            },
+            ModelUsage {
+                name: "claude-3-5-sonnet".to_string(),
+                requests_used: (continue_used as f64 * 0.2) as u32,
+                limit: (continue_limit as f64 * 0.2) as u32,
+            },
         ];
         agents.push(AgentState {
             id: AgentId::Continue,
@@ -1308,16 +1379,28 @@ impl AgentScanner {
             version: continue_ver,
             config_path: continue_config_str,
             is_authenticated: continue_installed,
-            auth_info: if continue_installed { "API Key / Local".to_string() } else { "Not Configured".to_string() },
+            auth_info: if continue_installed {
+                "API Key / Local".to_string()
+            } else {
+                "Not Configured".to_string()
+            },
             quota_type: QuotaType::Daily,
             user_tier: continue_tier,
             quota_used: continue_used,
             quota_limit: continue_limit,
             quota_remaining: continue_rem,
-            seconds_until_reset: if continue_installed { seconds_until_daily_reset() } else { 0 },
+            seconds_until_reset: if continue_installed {
+                seconds_until_daily_reset()
+            } else {
+                0
+            },
             sessions_count: if continue_installed { 3 } else { 0 },
             requests_count: continue_used,
-            tokens_used: if continue_installed { Some(40_000) } else { None },
+            tokens_used: if continue_installed {
+                Some(40_000)
+            } else {
+                None
+            },
             cost_usd: if continue_installed { Some(0.18) } else { None },
             model_usages: continue_model_usages,
         });
@@ -1334,13 +1417,23 @@ impl AgentScanner {
             None
         };
         let cody_installed = cody_exe.is_some();
-        let cody_tier = if cody_installed { UserTier::LocalFree } else { UserTier::NotInstalled };
-        let cody_limit = if config.cody_quota.custom { config.cody_quota.limit } else { 400 };
+        let cody_tier = if cody_installed {
+            UserTier::LocalFree
+        } else {
+            UserTier::NotInstalled
+        };
+        let cody_limit = if config.cody_quota.custom {
+            config.cody_quota.limit
+        } else {
+            400
+        };
         let cody_used = if cody_installed { 32 } else { 0 };
         let cody_rem = cody_limit.saturating_sub(cody_used);
-        let cody_model_usages = vec![
-            ModelUsage { name: "claude-3-5-sonnet".to_string(), requests_used: cody_used, limit: cody_limit },
-        ];
+        let cody_model_usages = vec![ModelUsage {
+            name: "claude-3-5-sonnet".to_string(),
+            requests_used: cody_used,
+            limit: cody_limit,
+        }];
         agents.push(AgentState {
             id: AgentId::Cody,
             name: "Cody".to_string(),
@@ -1348,13 +1441,21 @@ impl AgentScanner {
             version: cody_ver,
             config_path: cody_config_str,
             is_authenticated: cody_installed,
-            auth_info: if cody_installed { "Sourcegraph Cloud".to_string() } else { "Not Configured".to_string() },
+            auth_info: if cody_installed {
+                "Sourcegraph Cloud".to_string()
+            } else {
+                "Not Configured".to_string()
+            },
             quota_type: QuotaType::Monthly,
             user_tier: cody_tier,
             quota_used: cody_used,
             quota_limit: cody_limit,
             quota_remaining: cody_rem,
-            seconds_until_reset: if cody_installed { calculate_seconds_until_monthly_reset(chrono::Local::now()) } else { 0 },
+            seconds_until_reset: if cody_installed {
+                calculate_seconds_until_monthly_reset(chrono::Local::now())
+            } else {
+                0
+            },
             sessions_count: if cody_installed { 1 } else { 0 },
             requests_count: cody_used,
             tokens_used: if cody_installed { Some(12_000) } else { None },
@@ -1374,13 +1475,23 @@ impl AgentScanner {
             None
         };
         let supermaven_installed = supermaven_exe.is_some();
-        let supermaven_tier = if supermaven_installed { UserTier::LocalFree } else { UserTier::NotInstalled };
-        let supermaven_limit = if config.supermaven_quota.custom { config.supermaven_quota.limit } else { 2000 };
+        let supermaven_tier = if supermaven_installed {
+            UserTier::LocalFree
+        } else {
+            UserTier::NotInstalled
+        };
+        let supermaven_limit = if config.supermaven_quota.custom {
+            config.supermaven_quota.limit
+        } else {
+            2000
+        };
         let supermaven_used = if supermaven_installed { 450 } else { 0 };
         let supermaven_rem = supermaven_limit.saturating_sub(supermaven_used);
-        let supermaven_model_usages = vec![
-            ModelUsage { name: "supermaven-model".to_string(), requests_used: supermaven_used, limit: supermaven_limit },
-        ];
+        let supermaven_model_usages = vec![ModelUsage {
+            name: "supermaven-model".to_string(),
+            requests_used: supermaven_used,
+            limit: supermaven_limit,
+        }];
         agents.push(AgentState {
             id: AgentId::Supermaven,
             name: "Supermaven".to_string(),
@@ -1388,7 +1499,11 @@ impl AgentScanner {
             version: supermaven_ver,
             config_path: supermaven_config_str,
             is_authenticated: supermaven_installed,
-            auth_info: if supermaven_installed { "Supermaven Free".to_string() } else { "Not Configured".to_string() },
+            auth_info: if supermaven_installed {
+                "Supermaven Free".to_string()
+            } else {
+                "Not Configured".to_string()
+            },
             quota_type: QuotaType::Unlimited,
             user_tier: supermaven_tier,
             quota_used: supermaven_used,
@@ -1397,7 +1512,11 @@ impl AgentScanner {
             seconds_until_reset: 0,
             sessions_count: if supermaven_installed { 12 } else { 0 },
             requests_count: supermaven_used,
-            tokens_used: if supermaven_installed { Some(950_000) } else { None },
+            tokens_used: if supermaven_installed {
+                Some(950_000)
+            } else {
+                None
+            },
             cost_usd: Some(0.0),
             model_usages: supermaven_model_usages,
         });
@@ -1412,10 +1531,14 @@ mod tests {
     use std::fs;
     use std::os::unix::fs::PermissionsExt;
     use std::path::PathBuf;
+    use std::sync::atomic::{AtomicUsize, Ordering};
+
+    static MOCK_ID: AtomicUsize = AtomicUsize::new(0);
 
     fn create_mock_executable(name: &str, script_content: &str) -> PathBuf {
         let dir = std::env::temp_dir();
-        let path = dir.join(name);
+        let id = MOCK_ID.fetch_add(1, Ordering::SeqCst);
+        let path = dir.join(format!("{}_{}", name, id));
         fs::write(&path, script_content).unwrap();
         let mut perms = fs::metadata(&path).unwrap().permissions();
         perms.set_mode(0o755);

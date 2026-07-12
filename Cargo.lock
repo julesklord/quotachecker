@@ -1127,10 +1127,7 @@ dependencies = [
  "rusqlite",
  "serde",
  "serde_json",
-<<<<<<< HEAD
-=======
  "serial_test",
->>>>>>> 989fb42 (🧪 Add tests for AppConfig::save method)
  "tempfile",
  "toml",
 ]

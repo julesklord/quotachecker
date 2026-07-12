@@ -3,10 +3,6 @@ mod tests {
     use crate::agent::{base64_decode, decode_jwt_payload};
     use crate::config::AppConfig;
     use chrono::{Datelike, Duration, Local};
-    use serial_test::serial;
-    use std::env;
-    use std::fs;
-    use tempfile::tempdir;
 
     #[test]
     fn test_base64_decode() {
@@ -88,7 +84,10 @@ mod tests {
         }
 
         use std::time::{SystemTime, UNIX_EPOCH};
-        let timestamp = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_nanos();
+        let timestamp = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_nanos();
         let temp_dir = env::temp_dir().join(format!("quotachecker_test_home_{}", timestamp));
         let bin_dir = temp_dir.join(".local/bin");
         fs::create_dir_all(&bin_dir).unwrap();
@@ -97,8 +96,12 @@ mod tests {
 
         let mock_cmd = format!("mock_cmd_for_test_{}", timestamp);
         let mock_executable = bin_dir.join(&mock_cmd);
-        fs::write(&mock_executable, "#!/bin/sh
-exit 0").unwrap();
+        fs::write(
+            &mock_executable,
+            "#!/bin/sh
+exit 0",
+        )
+        .unwrap();
 
         #[cfg(unix)]
         {
@@ -108,13 +111,11 @@ exit 0").unwrap();
             fs::set_permissions(&mock_executable, perms).unwrap();
         }
 
-
         let result = AgentScanner::check_executable(&mock_cmd);
 
         let _ = fs::remove_dir_all(&temp_dir);
         assert_eq!(result, Some(mock_executable.to_string_lossy().to_string()));
     }
-
 
     #[test]
     fn test_tier_quota_limits() {
@@ -243,7 +244,7 @@ exit 0").unwrap();
 
     #[test]
     fn test_scan_all_agents() {
-        use crate::agent::{AgentScanner, AgentId};
+        use crate::agent::{AgentId, AgentScanner};
         let config = AppConfig::default();
         let agents = AgentScanner::scan(&config);
         assert_eq!(agents.len(), 9);
@@ -258,59 +259,67 @@ exit 0").unwrap();
         assert_eq!(agents[6].id, AgentId::Continue);
         assert_eq!(agents[7].id, AgentId::Cody);
         assert_eq!(agents[8].id, AgentId::Supermaven);
-    #[serial]
-    fn test_config_save() {
-        let dir = tempdir().unwrap();
-        let path = dir.path().to_owned();
+    }
+}
 
-        // Save original environment variables to restore them later
-        let home = env::var("HOME").ok();
-        let xdg_config_home = env::var("XDG_CONFIG_HOME").ok();
-        let appdata = env::var("APPDATA").ok();
+#[test]
+#[serial_test::serial]
+fn test_config_save() {
+    use crate::config::AppConfig;
+    use std::env;
+    use std::fs;
+    use tempfile::tempdir;
 
-        env::set_var("HOME", &path);
-        env::set_var("XDG_CONFIG_HOME", &path);
-        env::set_var("APPDATA", &path);
+    let dir = tempdir().unwrap();
+    let path = dir.path().to_owned();
 
-        let mut config = AppConfig::default();
-        config.refresh_rate_ms = 9999;
+    // Save original environment variables to restore them later
+    let home = env::var("HOME").ok();
+    let xdg_config_home = env::var("XDG_CONFIG_HOME").ok();
+    let appdata = env::var("APPDATA").ok();
 
-        // Obtain the dynamic config path
-        let config_path = AppConfig::config_path().expect("Should determine config path");
+    env::set_var("HOME", &path);
+    env::set_var("XDG_CONFIG_HOME", &path);
+    env::set_var("APPDATA", &path);
 
-        // Assert that the config is inside our temp directory
-        assert!(config_path.starts_with(&path));
+    let mut config = AppConfig::default();
+    config.refresh_rate_ms = 9999;
 
-        let save_result = config.save();
-        assert!(
-            save_result.is_ok(),
-            "Failed to save config: {:?}",
-            save_result.err()
-        );
+    // Obtain the dynamic config path
+    let config_path = AppConfig::config_path().expect("Should determine config path");
 
-        assert!(config_path.exists(), "Config file was not created");
+    // Assert that the config is inside our temp directory
+    assert!(config_path.starts_with(&path));
 
-        let content = fs::read_to_string(&config_path).unwrap();
-        let loaded: AppConfig = serde_json::from_str(&content).unwrap();
+    let save_result = config.save();
+    assert!(
+        save_result.is_ok(),
+        "Failed to save config: {:?}",
+        save_result.err()
+    );
 
-        assert_eq!(loaded.refresh_rate_ms, 9999);
-        assert_eq!(loaded.theme, config.theme);
+    assert!(config_path.exists(), "Config file was not created");
 
-        // Restore environment variables
-        if let Some(h) = home {
-            env::set_var("HOME", h);
-        } else {
-            env::remove_var("HOME");
-        }
-        if let Some(x) = xdg_config_home {
-            env::set_var("XDG_CONFIG_HOME", x);
-        } else {
-            env::remove_var("XDG_CONFIG_HOME");
-        }
-        if let Some(a) = appdata {
-            env::set_var("APPDATA", a);
-        } else {
-            env::remove_var("APPDATA");
-        }
+    let content = fs::read_to_string(&config_path).unwrap();
+    let loaded: AppConfig = serde_json::from_str(&content).unwrap();
+
+    assert_eq!(loaded.refresh_rate_ms, 9999);
+    assert_eq!(loaded.theme, config.theme);
+
+    // Restore environment variables
+    if let Some(h) = home {
+        env::set_var("HOME", h);
+    } else {
+        env::remove_var("HOME");
+    }
+    if let Some(x) = xdg_config_home {
+        env::set_var("XDG_CONFIG_HOME", x);
+    } else {
+        env::remove_var("XDG_CONFIG_HOME");
+    }
+    if let Some(a) = appdata {
+        env::set_var("APPDATA", a);
+    } else {
+        env::remove_var("APPDATA");
     }
 }

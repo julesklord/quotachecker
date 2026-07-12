@@ -923,7 +923,7 @@ fn draw_agents_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
         )
         .label(
             if selected_agent.quota_type == crate::agent::QuotaType::Unlimited {
-                "Uso Local Ilimitado".to_string()
+                "Unlimited Local Usage".to_string()
             } else {
                 format!(
                     "{}/{} Requests Used ({:.1}%)",
@@ -960,7 +960,7 @@ fn draw_agents_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
         )
         .label(
             if selected_agent.quota_type == crate::agent::QuotaType::Unlimited {
-                "Uso Local Ilimitado".to_string()
+                "Unlimited Local Usage".to_string()
             } else {
                 format!(
                     "{} Requests Remaining ({:.1}%)",
@@ -1085,52 +1085,91 @@ fn draw_agents_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
         ]));
     }
 
-    let model_table = Table::new(
-        model_rows,
-        [
-            Constraint::Percentage(36),
-            Constraint::Percentage(24),
-            Constraint::Percentage(12),
-            Constraint::Percentage(28),
-        ],
-    )
-    .header(
-        Row::new(vec!["  Model", "Usage / Limit", "Used %", "Progress"])
-            .style(
-                Style::default()
-                    .fg(color_primary)
-                    .bold()
-                    .add_modifier(Modifier::UNDERLINED),
-            )
-            .bottom_margin(1),
-    )
-    .block(
-        Block::default()
-            .borders(Borders::ALL)
-            .border_type(BorderType::Rounded)
-            .border_style(Style::default().fg(COLOR_MUTED))
-            .bg(COLOR_CARD)
-            .title(Span::styled(
-                " ▦ MODEL-LEVEL BREAKDOWN ",
-                Style::default().fg(COLOR_MUTED).bold(),
+    if model_rows.is_empty() {
+        let empty_state_p = Paragraph::new(vec![
+            Line::from(""),
+            Line::from(Span::styled(
+                "◌  No models found",
+                Style::default().fg(COLOR_MUTED).italic(),
             )),
-    );
-    f.render_widget(model_table, detail_chunks[2]);
+            Line::from(Span::styled(
+                "No model usage telemetry available for this agent.",
+                Style::default().fg(COLOR_DIM).italic(),
+            )),
+        ])
+        .alignment(Alignment::Center)
+        .block(
+            Block::default()
+                .borders(Borders::ALL)
+                .border_type(BorderType::Rounded)
+                .border_style(Style::default().fg(COLOR_MUTED))
+                .bg(COLOR_CARD)
+                .title(Span::styled(
+                    " ▦ MODEL-LEVEL BREAKDOWN ",
+                    Style::default().fg(COLOR_MUTED).bold(),
+                )),
+        );
+        f.render_widget(empty_state_p, detail_chunks[2]);
+    } else {
+        let model_table = Table::new(
+            model_rows,
+            [
+                Constraint::Percentage(36),
+                Constraint::Percentage(24),
+                Constraint::Percentage(12),
+                Constraint::Percentage(28),
+            ],
+        )
+        .header(
+            Row::new(vec!["  Model", "Usage / Limit", "Used %", "Progress"])
+                .style(
+                    Style::default()
+                        .fg(color_primary)
+                        .bold()
+                        .add_modifier(Modifier::UNDERLINED),
+                )
+                .bottom_margin(1),
+        )
+        .block(
+            Block::default()
+                .borders(Borders::ALL)
+                .border_type(BorderType::Rounded)
+                .border_style(Style::default().fg(COLOR_MUTED))
+                .bg(COLOR_CARD)
+                .title(Span::styled(
+                    " ▦ MODEL-LEVEL BREAKDOWN ",
+                    Style::default().fg(COLOR_MUTED).bold(),
+                )),
+        );
+        f.render_widget(model_table, detail_chunks[2]);
+    }
 
     // Quick Command Hint Bar
-    let inst_text = Line::from(vec![
-        Span::styled("  ", Style::default()),
-        Span::styled(
+    let mut hint_spans = vec![Span::styled("  ", Style::default())];
+
+    if selected_agent.executable_path.is_some()
+        && selected_agent.quota_type != crate::agent::QuotaType::Unlimited
+    {
+        hint_spans.push(Span::styled(
             " s ",
             Style::default().fg(Color::Black).bg(color_primary).bold(),
-        ),
-        Span::styled(" Modify quota limit  ", Style::default().fg(COLOR_MUTED)),
-        Span::styled(
-            " ↑↓ ",
-            Style::default().fg(Color::Black).bg(COLOR_DIM).bold(),
-        ),
-        Span::styled(" Navigate agents ", Style::default().fg(COLOR_MUTED)),
-    ]);
+        ));
+        hint_spans.push(Span::styled(
+            " Modify quota limit  ",
+            Style::default().fg(COLOR_MUTED),
+        ));
+    }
+
+    hint_spans.push(Span::styled(
+        " ↑↓ ",
+        Style::default().fg(Color::Black).bg(COLOR_DIM).bold(),
+    ));
+    hint_spans.push(Span::styled(
+        " Navigate agents ",
+        Style::default().fg(COLOR_MUTED),
+    ));
+
+    let inst_text = Line::from(hint_spans);
 
     let inst_para = Paragraph::new(inst_text)
         .block(
@@ -1181,24 +1220,16 @@ fn draw_sessions_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
         let agent_color = get_agent_color(agent.id);
 
         if agent.sessions_count > 0 {
-            for idx in 0..agent.sessions_count.min(5) {
-                let session_id = format!("{:x}", 1395819581293u64 + idx as u64);
-                rows.push(Row::new(vec![
-                    Cell::new(format!("  {}", agent.name))
-                        .style(Style::default().fg(agent_color).bold()),
-                    Cell::new(format!("#{}", &session_id[..8]))
-                        .style(Style::default().fg(COLOR_INFO)),
-                    Cell::new(format!("{}m ago", idx * 10 + 5))
-                        .style(Style::default().fg(COLOR_MUTED)),
-                    Cell::new(" ✔ OK ")
-                        .style(Style::default().fg(Color::Black).bg(COLOR_SUCCESS).bold()),
-                    Cell::new(format!(
-                        "{} reqs",
-                        agent.requests_count / agent.sessions_count
-                    ))
+            rows.push(Row::new(vec![
+                Cell::new(format!("  {}", agent.name))
+                    .style(Style::default().fg(agent_color).bold()),
+                Cell::new("Aggregate").style(Style::default().fg(COLOR_INFO).italic()),
+                Cell::new("-").style(Style::default().fg(COLOR_MUTED)),
+                Cell::new(" ✔ OK ")
+                    .style(Style::default().fg(Color::Black).bg(COLOR_SUCCESS).bold()),
+                Cell::new(format!("{} reqs", agent.requests_count))
                     .style(Style::default().fg(COLOR_TEXT)),
-                ]));
-            }
+            ]));
         }
     }
 
@@ -1233,10 +1264,10 @@ fn draw_sessions_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
             rows,
             [
                 Constraint::Percentage(18),
-                Constraint::Percentage(22),
+                Constraint::Percentage(26),
                 Constraint::Percentage(18),
                 Constraint::Percentage(14),
-                Constraint::Percentage(18),
+                Constraint::Percentage(24),
             ],
         )
         .header(
@@ -1292,7 +1323,11 @@ fn draw_quotas_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
         let agent_color = get_agent_color(agent.id);
 
         let action_cell = if is_inst {
-            Cell::new("Modify (s)").style(Style::default().fg(color_primary).italic())
+            if agent.quota_type == crate::agent::QuotaType::Unlimited {
+                Cell::new("N/A - Unlimited").style(Style::default().fg(COLOR_MUTED).italic())
+            } else {
+                Cell::new("Modify (s)").style(Style::default().fg(color_primary).italic())
+            }
         } else {
             Cell::new("N/A - Telemetry Omitted").style(Style::default().fg(COLOR_MUTED))
         };
@@ -1408,7 +1443,7 @@ fn draw_quotas_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
             let mut spans = vec![
                 Span::styled("  ", Style::default()),
                 Span::styled(
-                    " Tab ",
+                    " Tab/←→ ",
                     Style::default().fg(Color::Black).bg(COLOR_DIM).bold(),
                 ),
                 Span::styled("  Change screen   ", Style::default().fg(COLOR_MUTED)),
@@ -1419,12 +1454,18 @@ fn draw_quotas_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
                 Span::styled("  Select agent   ", Style::default().fg(COLOR_MUTED)),
             ];
 
-            if ctx.agents[ctx.selected_agent_idx].executable_path.is_some() {
+            if ctx.agents[ctx.selected_agent_idx].executable_path.is_some()
+                && ctx.agents[ctx.selected_agent_idx].quota_type
+                    != crate::agent::QuotaType::Unlimited
+            {
                 spans.push(Span::styled(
                     " s ",
                     Style::default().fg(Color::Black).bg(color_primary).bold(),
                 ));
-                spans.push(Span::styled("  Edit limit   ", Style::default().fg(COLOR_MUTED)));
+                spans.push(Span::styled(
+                    "  Edit limit   ",
+                    Style::default().fg(COLOR_MUTED),
+                ));
             }
 
             spans.push(Span::styled(
@@ -1575,19 +1616,38 @@ fn draw_settings_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
             Style::default().fg(COLOR_MUTED).italic(),
         )),
         Line::from(""),
-        Line::from(vec![
-            Span::styled("  ", Style::default()),
-            Span::styled(
-                " ↑↓ ",
-                Style::default().fg(Color::Black).bg(COLOR_DIM).bold(),
-            ),
-            Span::styled("  Select   ", Style::default().fg(COLOR_MUTED)),
-            Span::styled(
-                " Enter / +/- ",
-                Style::default().fg(Color::Black).bg(COLOR_DIM).bold(),
-            ),
-            Span::styled("  Cycle value", Style::default().fg(COLOR_MUTED)),
-        ]),
+        Line::from({
+            let mut spans = vec![
+                Span::styled("  ", Style::default()),
+                Span::styled(
+                    " ↑↓ ",
+                    Style::default().fg(Color::Black).bg(COLOR_DIM).bold(),
+                ),
+                Span::styled("  Select   ", Style::default().fg(COLOR_MUTED)),
+            ];
+
+            if ctx.selected_setting_idx == 4 {
+                spans.push(Span::styled(
+                    " Enter / e ",
+                    Style::default().fg(Color::Black).bg(COLOR_DIM).bold(),
+                ));
+                spans.push(Span::styled(
+                    "  Open editor",
+                    Style::default().fg(COLOR_MUTED),
+                ));
+            } else {
+                spans.push(Span::styled(
+                    " Enter / +/- ",
+                    Style::default().fg(Color::Black).bg(COLOR_DIM).bold(),
+                ));
+                spans.push(Span::styled(
+                    "  Cycle value",
+                    Style::default().fg(COLOR_MUTED),
+                ));
+            }
+
+            spans
+        }),
     ];
 
     let path_para = Paragraph::new(path_lines).block(
@@ -1622,27 +1682,35 @@ fn draw_footer(f: &mut Frame, area: Rect, ctx: &RenderContext) {
 
     // Common keybinds
     let mut footer_spans: Vec<Span> = Vec::new();
-    footer_spans.extend(kpill("q", "Quit", COLOR_DANGER));
-    footer_spans.extend(kpill("Tab", "Switch tab", COLOR_DIM));
 
-    // Tab-specific
-    match ctx.active_tab {
-        1 | 3 => {
-            footer_spans.extend(kpill("↑↓", "Select agent", COLOR_DIM));
-            if ctx.agents[ctx.selected_agent_idx].executable_path.is_some() {
-                footer_spans.extend(kpill("s", "Edit quota", color_primary));
+    if ctx.show_budget_modal {
+        footer_spans.extend(kpill("Enter", "Save", color_primary));
+        footer_spans.extend(kpill("Esc", "Cancel", COLOR_DIM));
+    } else {
+        footer_spans.extend(kpill("q", "Quit", COLOR_DANGER));
+        footer_spans.extend(kpill("Tab/←→", "Switch tab", COLOR_DIM));
+        footer_spans.extend(kpill("r", "Force refresh", color_primary));
+
+        // Tab-specific
+        match ctx.active_tab {
+            1 | 3 => {
+                footer_spans.extend(kpill("↑↓", "Select agent", COLOR_DIM));
+                if ctx.agents[ctx.selected_agent_idx].executable_path.is_some()
+                    && ctx.agents[ctx.selected_agent_idx].quota_type
+                        != crate::agent::QuotaType::Unlimited
+                {
+                    footer_spans.extend(kpill("s", "Edit quota", color_primary));
+                }
             }
-        }
-        4 => {
-            footer_spans.extend(kpill("↑↓", "Select", COLOR_DIM));
-            if ctx.selected_setting_idx == 4 {
-                footer_spans.extend(kpill("Enter", "Open editor", color_primary));
-            } else {
-                footer_spans.extend(kpill("Enter/+/-", "Cycle value", color_primary));
+            4 => {
+                footer_spans.extend(kpill("↑↓", "Select", COLOR_DIM));
+                if ctx.selected_setting_idx == 4 {
+                    footer_spans.extend(kpill("Enter", "Open editor", color_primary));
+                } else {
+                    footer_spans.extend(kpill("Enter/+/-", "Cycle value", color_primary));
+                }
             }
-        }
-        _ => {
-            footer_spans.extend(kpill("r", "Force refresh", color_primary));
+            _ => {}
         }
     }
 
@@ -1742,7 +1810,7 @@ fn draw_budget_modal(f: &mut Frame, area: Rect, ctx: &RenderContext) {
     )));
     let (border_color, text_style, display_text) = if display_val.is_empty() {
         (
-            COLOR_DANGER,
+            COLOR_MUTED,
             Style::default().fg(COLOR_DIM),
             format!("Enter limit...{}", cursor_suffix),
         )
@@ -1769,7 +1837,13 @@ fn draw_budget_modal(f: &mut Frame, area: Rect, ctx: &RenderContext) {
     f.render_widget(label_p, row_chunks[0]);
     f.render_widget(val_p, row_chunks[1]);
 
-    if !is_valid || display_val.is_empty() {
+    if display_val.is_empty() {
+        let hint_p = Paragraph::new(Line::from(Span::styled(
+            " ℹ Please enter a numeric limit",
+            Style::default().fg(COLOR_MUTED).italic(),
+        )));
+        f.render_widget(hint_p, form_layout[3]);
+    } else if !is_valid {
         let warning_p = Paragraph::new(Line::from(Span::styled(
             " ⚠ Valid number required",
             Style::default().fg(COLOR_DANGER).italic(),

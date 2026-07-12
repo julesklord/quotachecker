@@ -1,0 +1,16 @@
+--- src/agent.rs
++++ src/agent.rs
+@@ -131,14 +131,7 @@
+ }
+
+ fn get_cached_version(executable: &str) -> Option<String> {
+-    static CACHE: OnceLock<Mutex<HashMap<String, Option<String>>>> = OnceLock::new();
+-    let map_mutex = CACHE.get_or_init(|| Mutex::new(HashMap::new()));
+-    let mut map = map_mutex.lock().unwrap();
+-    map.entry(executable.to_string())
+-        .or_insert_with(|| AgentScanner::get_version(executable))
+-        .clone()
++    AgentScanner::get_version(executable)
+ }
+
+ pub(crate) fn seconds_until_weekly_reset() -> i64 {
