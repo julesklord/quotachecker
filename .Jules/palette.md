@@ -45,3 +45,7 @@
 ## 2024-05-27 - Prevent global keybind overriding
 **Learning:** In terminal applications, users get easily confused when they use an action keybind (like `s` to edit a setting) in a view where that action is completely invalid (like an overview tab), especially if the action is secretly bound globally but only meant to be used contextually.
 **Action:** Always ensure action keybindings are strictly scoped to the tabs or views where they are valid, matching the dynamically rendered keybind hints.
+
+## 2026-07-06 - Clarify Selection Indicators
+**Learning:** Standard selection indicator symbols (like SYM_ARROW) should be reserved for the selected item, not used to indicate a boolean state like installed.
+**Action:** Always map selection symbols strictly to the is_selected state to prevent user confusion.
