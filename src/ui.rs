@@ -708,10 +708,11 @@ fn draw_agents_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
 
         let item_color = get_agent_color(agent.id);
 
-        let (prefix, status_dot, status_color) = if is_inst {
-            (SYM_ARROW, "● ", COLOR_SUCCESS)
+        let prefix = if is_selected { SYM_ARROW } else { " " };
+        let (status_dot, status_color) = if is_inst {
+            ("● ", COLOR_SUCCESS)
         } else {
-            (" ", "○ ", COLOR_MUTED)
+            ("○ ", COLOR_MUTED)
         };
 
         let name_style = if is_selected {
