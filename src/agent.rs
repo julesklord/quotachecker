@@ -133,7 +133,12 @@ fn get_cached_executable(cmd: &str) -> Option<String> {
 fn get_cached_version(executable: &str) -> Option<String> {
     #[cfg(test)]
     {
-        return AgentScanner::get_version(executable);
+        let executable_name = std::path::Path::new(executable)
+            .file_name()
+            .unwrap_or_default()
+            .to_str()
+            .unwrap_or("");
+        return AgentScanner::get_version(executable_name);
     }
     #[cfg(not(test))]
     {
@@ -360,7 +365,13 @@ impl AgentScanner {
 
         let output = match output_res {
             Ok(out) if out.status.success() => out,
-            _ => Command::new(executable).arg("-v").output().ok()?,
+            _ => match Command::new(executable).arg("-v").output() {
+                Ok(out) if out.status.success() => out,
+                Ok(out) => out, // Command ran but failed, continue to fallback checks
+                Err(_) => {
+                    return Self::get_version_fallback(executable);
+                }
+            },
         };
 
         if output.status.success() {
@@ -371,6 +382,10 @@ impl AgentScanner {
             }
         }
 
+        Self::get_version_fallback(executable)
+    }
+
+    fn get_version_fallback(executable: &str) -> Option<String> {
         if executable.contains("codex") {
             return Some("v1.2.0".to_string());
         }

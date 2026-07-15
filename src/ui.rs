@@ -278,7 +278,7 @@ fn draw_overview_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
         }
 
         summary_rows.push(Row::new(vec![
-            Cell::new(format!("  {}", agent.name)).style(Style::default().fg(agent_color).bold()),
+            Cell::new(agent.name.clone()).style(Style::default().fg(agent_color).bold()),
             Cell::new(status_symbol).style(Style::default().fg(status_color).bold()),
             Cell::new(agent.user_tier.display_name()).style(Style::default().fg(if is_inst {
                 COLOR_TEXT
@@ -427,7 +427,7 @@ fn draw_overview_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
         .take(15)
         .map(|log| {
             ListItem::new(Line::from(vec![
-                Span::styled("• ", Style::default().fg(color_primary)),
+                Span::styled("❯ ", Style::default().fg(color_primary)),
                 Span::styled(log, Style::default().fg(COLOR_TEXT)),
             ]))
         })

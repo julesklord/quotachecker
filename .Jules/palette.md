@@ -49,6 +49,3 @@
 ## 2026-07-06 - Clarify Selection Indicators
 **Learning:** Standard selection indicator symbols (like SYM_ARROW) should be reserved for the selected item, not used to indicate a boolean state like installed.
 **Action:** Always map selection symbols strictly to the is_selected state to prevent user confusion.
-## 2026-07-15 - Table Alignment and Icon Clarity
-**Learning:** In terminal applications, lists and tables often mix interactive symbols (like a selection indicator `❯`) with non-interactive elements (like a log entry). Using the same symbol for both causes confusion. Additionally, headers without padding can misalign with unpadded cell values, degrading the UI structure.
-**Action:** Ensure consistent padding in table cells to match headers, and strictly reserve interactive indicator symbols (like `❯`) for selected items, using static bullets (`•`) for standard list items.
