@@ -70,7 +70,17 @@ Todos los hallazgos críticos detectados en la auditoría inicial han sido corre
 ### 3.5. Baja Cobertura de Pruebas Unitarias — **[MEJORADO]**
 > [!NOTE]
 > **Estado: Mitigado**
-> Se expandió la suite de pruebas automatizadas en [tests.rs](file:///mnt/DEV/Proyectos/repos/quotachecker/quotachecker-tui/src/tests.rs), introduciendo validaciones específicas para el mapeo de nombres de categorías y cuotas de usuario (`UserTier::display_name`).
+> Se expandió la suite de pruebas automatizadas en [tests.rs](file:///mnt/DEV/Proyectos/repos/julesklord/quotachecker/quotachecker-tui/src/tests.rs), introduciendo validaciones específicas para el mapeo de nombres de categorías y cuotas de usuario (`UserTier::display_name`).
+
+### 3.6. Advertencias y Errores de Linter Clippy (-D warnings) — **[CORREGIDO]**
+> [!NOTE]
+> **Estado: Solucionado**
+> Se resolvieron 5 advertencias/errores de Clippy bajo la regla estricta `-D warnings` (retornos innecesarios en `agent.rs`, inicializador const de thread-local y reasignaciones de campos usando valores por defecto en `config.rs`, e incepción de módulos en `tests.rs`). Ahora el proyecto compila limpiamente sin warnings ni errores de linter.
+
+### 3.7. Riesgo de Colisión en Archivos Temporales de Pruebas — **[CORREGIDO]**
+> [!NOTE]
+> **Estado: Solucionado**
+> Se incorporó el ID de proceso (`std::process::id()`) en la generación de nombres de ejecutables de prueba temporales (`create_mock_executable`) en `src/agent.rs` para garantizar la unicidad de los nombres de archivo y evitar colisiones en ejecuciones de pruebas concurrentes o multiusuarios en entornos de desarrollo y CI/CD.
 
 ---
 
@@ -80,8 +90,10 @@ Las tareas planificadas han concluido exitosamente:
 
 | Tarea | Estado | Archivos Afectados |
 |---|---|---|
-| Configurar busy_timeout en SQLite | **Completado** | [agent.rs](file:///mnt/DEV/Proyectos/repos/quotachecker/quotachecker-tui/src/agent.rs) |
-| Optimizar lectura de config (disco/RAM) | **Completado** | [main.rs](file:///mnt/DEV/Proyectos/repos/quotachecker/quotachecker-tui/src/main.rs) |
-| Corregir navegación flechas izq/der | **Completado** | [main.rs](file:///mnt/DEV/Proyectos/repos/quotachecker/quotachecker-tui/src/main.rs), [ui.rs](file:///mnt/DEV/Proyectos/repos/quotachecker/quotachecker-tui/src/ui.rs) |
-| Renombrar funciones de pestañas en UI | **Completado** | [ui.rs](file:///mnt/DEV/Proyectos/repos/quotachecker/quotachecker-tui/src/ui.rs), [main.rs](file:///mnt/DEV/Proyectos/repos/quotachecker/quotachecker-tui/src/main.rs) |
-| Aumentar cobertura de pruebas unitarias | **Completado** | [tests.rs](file:///mnt/DEV/Proyectos/repos/quotachecker/quotachecker-tui/src/tests.rs) |
+| Configurar busy_timeout en SQLite | **Completado** | [agent.rs](file:///mnt/DEV/Proyectos/repos/julesklord/quotachecker/quotachecker-tui/src/agent.rs) |
+| Optimizar lectura de config (disco/RAM) | **Completado** | [main.rs](file:///mnt/DEV/Proyectos/repos/julesklord/quotachecker/quotachecker-tui/src/main.rs) |
+| Corregir navegación flechas izq/der | **Completado** | [main.rs](file:///mnt/DEV/Proyectos/repos/julesklord/quotachecker/quotachecker-tui/src/main.rs), [ui.rs](file:///mnt/DEV/Proyectos/repos/julesklord/quotachecker/quotachecker-tui/src/ui.rs) |
+| Renombrar funciones de pestañas en UI | **Completado** | [ui.rs](file:///mnt/DEV/Proyectos/repos/julesklord/quotachecker/quotachecker-tui/src/ui.rs), [main.rs](file:///mnt/DEV/Proyectos/repos/julesklord/quotachecker/quotachecker-tui/src/main.rs) |
+| Aumentar cobertura de pruebas unitarias | **Completado** | [tests.rs](file:///mnt/DEV/Proyectos/repos/julesklord/quotachecker/quotachecker-tui/src/tests.rs) |
+| Resolver advertencias y lints de Clippy | **Completado** | [agent.rs](file:///mnt/DEV/Proyectos/repos/julesklord/quotachecker/quotachecker-tui/src/agent.rs), [config.rs](file:///mnt/DEV/Proyectos/repos/julesklord/quotachecker/quotachecker-tui/src/config.rs), [tests.rs](file:///mnt/DEV/Proyectos/repos/julesklord/quotachecker/quotachecker-tui/src/tests.rs) |
+| Robustecer unicidad de archivos temporales en tests | **Completado** | [agent.rs](file:///mnt/DEV/Proyectos/repos/julesklord/quotachecker/quotachecker-tui/src/agent.rs) |

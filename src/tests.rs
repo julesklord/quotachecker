@@ -1,5 +1,5 @@
 #[cfg(test)]
-mod tests {
+mod unit_tests {
     use crate::agent::{base64_decode, decode_jwt_payload};
     use crate::config::AppConfig;
     use chrono::{Datelike, Duration, Local};

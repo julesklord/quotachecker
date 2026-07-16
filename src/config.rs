@@ -6,7 +6,7 @@ use std::path::PathBuf;
 
 #[cfg(test)]
 thread_local! {
-    pub static TEST_CONFIG_PATH: std::cell::RefCell<Option<PathBuf>> = std::cell::RefCell::new(None);
+    pub static TEST_CONFIG_PATH: std::cell::RefCell<Option<PathBuf>> = const { std::cell::RefCell::new(None) };
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq, Eq, Default)]
@@ -200,9 +200,11 @@ mod tests {
         let config_path = dir.path().join("config.json");
         set_test_config_path(Some(config_path.clone()));
 
-        let mut config = AppConfig::default();
-        config.refresh_rate_ms = 5000;
-        config.theme = TuiTheme::Amber;
+        let config = AppConfig {
+            refresh_rate_ms: 5000,
+            theme: TuiTheme::Amber,
+            ..Default::default()
+        };
 
         let content = serde_json::to_string(&config).unwrap();
         fs::write(&config_path, content).unwrap();
@@ -260,9 +262,11 @@ mod tests {
         let config_path = dir.path().join("config.json");
         set_test_config_path(Some(config_path.clone()));
 
-        let mut config = AppConfig::default();
-        config.refresh_rate_ms = 9999;
-        config.theme = TuiTheme::Purple;
+        let config = AppConfig {
+            refresh_rate_ms: 9999,
+            theme: TuiTheme::Purple,
+            ..Default::default()
+        };
 
         assert!(config.save().is_ok());
         assert!(config_path.exists());

@@ -138,7 +138,7 @@ fn get_cached_version(executable: &str) -> Option<String> {
             .unwrap_or_default()
             .to_str()
             .unwrap_or("");
-        return AgentScanner::get_version(executable_name);
+        AgentScanner::get_version(executable_name)
     }
     #[cfg(not(test))]
     {
@@ -1553,7 +1553,8 @@ mod tests {
     fn create_mock_executable(name: &str, script_content: &str) -> PathBuf {
         let dir = std::env::temp_dir();
         let id = MOCK_ID.fetch_add(1, Ordering::SeqCst);
-        let path = dir.join(format!("{}_{}", name, id));
+        let pid = std::process::id();
+        let path = dir.join(format!("{}_{}_{}", name, pid, id));
         fs::write(&path, script_content).unwrap();
         let mut perms = fs::metadata(&path).unwrap().permissions();
         perms.set_mode(0o755);
