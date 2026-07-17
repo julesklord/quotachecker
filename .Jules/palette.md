@@ -49,3 +49,7 @@
 ## 2026-07-06 - Clarify Selection Indicators
 **Learning:** Standard selection indicator symbols (like SYM_ARROW) should be reserved for the selected item, not used to indicate a boolean state like installed.
 **Action:** Always map selection symbols strictly to the is_selected state to prevent user confusion.
+
+## 2024-05-28 - Avoid Misleading Navigational Affordances in Settings
+**Learning:** Using `<` and `>` around setting values (e.g., `< 1000ms >`) strongly implies left/right arrow key navigation. If left/right arrows are already bound to global navigation (like changing tabs), users will accidentally switch tabs when trying to cycle values, causing frustration.
+**Action:** Ensure visual framing of values matches the interaction model. Use neutral brackets like `[ ]` when values are cycled via `Enter` or other keys, reserving `<` and `>` only for actual horizontal navigation.
