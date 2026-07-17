@@ -991,9 +991,13 @@ fn draw_agents_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
         let hours = (secs % (24 * 3600)) / 3600;
         let minutes = (secs % 3600) / 60;
         if days > 0 {
-            format!("in {} days and {} hours", days, hours)
+            let d_str = if days == 1 { "day" } else { "days" };
+            let h_str = if hours == 1 { "hour" } else { "hours" };
+            format!("in {} {} and {} {}", days, d_str, hours, h_str)
         } else {
-            format!("in {} hours and {} minutes", hours, minutes)
+            let h_str = if hours == 1 { "hour" } else { "hours" };
+            let m_str = if minutes == 1 { "minute" } else { "minutes" };
+            format!("in {} {} and {} {}", hours, h_str, minutes, m_str)
         }
     };
 
@@ -1508,22 +1512,22 @@ fn draw_settings_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
     let settings = [
         (
             "TUI Active Color Theme",
-            format!("< {:?} >", ctx.config.theme),
+            format!("[ {:?} ]", ctx.config.theme),
             "Customize TUI highlight brand accent",
         ),
         (
             "Telemetry Refresh Interval",
-            format!("< {}ms >", ctx.config.refresh_rate_ms),
+            format!("[ {}ms ]", ctx.config.refresh_rate_ms),
             "How often SQLite files are scanned",
         ),
         (
             "Soft Warning Threshold (%)",
-            format!("< {}% >", ctx.config.soft_limit_percent as u32),
+            format!("[ {}% ]", ctx.config.soft_limit_percent as u32),
             "Usage warning threshold",
         ),
         (
             "Hard Warning Threshold (%)",
-            format!("< {}% >", ctx.config.hard_limit_percent as u32),
+            format!("[ {}% ]", ctx.config.hard_limit_percent as u32),
             "Quota exceeded limit indicator",
         ),
         (
