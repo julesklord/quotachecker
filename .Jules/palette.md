@@ -53,3 +53,7 @@
 ## 2024-05-28 - Avoid Misleading Navigational Affordances in Settings
 **Learning:** Using `<` and `>` around setting values (e.g., `< 1000ms >`) strongly implies left/right arrow key navigation. If left/right arrows are already bound to global navigation (like changing tabs), users will accidentally switch tabs when trying to cycle values, causing frustration.
 **Action:** Ensure visual framing of values matches the interaction model. Use neutral brackets like `[ ]` when values are cycled via `Enter` or other keys, reserving `<` and `>` only for actual horizontal navigation.
+
+## 2026-07-18 - Explicit Keybind Alternatives
+**Learning:** When alternative keybindings exist for the same action (e.g. 'e' and 'Enter' for opening an editor), omitting one from the footer hints leads to reduced discoverability and potential user frustration.
+**Action:** Always combine alternative keybindings in a single hint (e.g. 'Enter/e') if space allows to ensure maximum discoverability.

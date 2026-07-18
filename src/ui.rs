@@ -1710,7 +1710,7 @@ fn draw_footer(f: &mut Frame, area: Rect, ctx: &RenderContext) {
             4 => {
                 footer_spans.extend(kpill("↑↓", "Select", COLOR_DIM));
                 if ctx.selected_setting_idx == 4 {
-                    footer_spans.extend(kpill("Enter", "Open editor", color_primary));
+                    footer_spans.extend(kpill("Enter/e", "Open editor", color_primary));
                 } else {
                     footer_spans.extend(kpill("Enter/+/-", "Cycle value", color_primary));
                 }
