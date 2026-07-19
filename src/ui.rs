@@ -427,7 +427,7 @@ fn draw_overview_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
         .take(15)
         .map(|log| {
             ListItem::new(Line::from(vec![
-                Span::styled("❯ ", Style::default().fg(color_primary)),
+                Span::styled("▪ ", Style::default().fg(color_primary)),
                 Span::styled(log, Style::default().fg(COLOR_TEXT)),
             ]))
         })
@@ -1324,7 +1324,7 @@ fn draw_quotas_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
         let is_selected = i == ctx.selected_agent_idx;
         let is_inst = agent.executable_path.is_some();
 
-        let prefix = if is_selected { "❯ " } else { "  " };
+        let prefix = if is_selected { SYM_ARROW } else { " " };
         let agent_color = get_agent_color(agent.id);
 
         let action_cell = if is_inst {
@@ -1345,7 +1345,7 @@ fn draw_quotas_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
 
         rows.push(
             Row::new(vec![
-                Cell::new(format!("{}{}", prefix, agent.name))
+                Cell::new(format!("{} {}", prefix, agent.name))
                     .style(Style::default().fg(agent_color).bold()),
                 Cell::new(agent.user_tier.display_name().to_string())
                     .style(Style::default().fg(if is_inst { COLOR_TEXT } else { COLOR_MUTED })),
@@ -1539,7 +1539,7 @@ fn draw_settings_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
 
     for (i, &(name, ref val, desc)) in settings.iter().enumerate() {
         let is_selected = i == ctx.selected_setting_idx;
-        let prefix = if is_selected { "❯ " } else { "  " };
+        let prefix = if is_selected { SYM_ARROW } else { " " };
         let name_style = if is_selected {
             Style::default().fg(color_primary).bold()
         } else {
@@ -1556,7 +1556,7 @@ fn draw_settings_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
 
         rows.push(
             Row::new(vec![
-                Cell::new(format!("{}{}", prefix, name)).style(name_style),
+                Cell::new(format!("{} {}", prefix, name)).style(name_style),
                 Cell::new(val.clone()).style(Style::default().fg(val_color).bold()),
                 Cell::new(desc.to_string()).style(Style::default().fg(COLOR_MUTED)),
             ])
@@ -1710,9 +1710,10 @@ fn draw_footer(f: &mut Frame, area: Rect, ctx: &RenderContext) {
             4 => {
                 footer_spans.extend(kpill("↑↓", "Select", COLOR_DIM));
                 if ctx.selected_setting_idx == 4 {
-                    footer_spans.extend(kpill("Enter", "Open editor", color_primary));
+                    footer_spans.extend(kpill("Enter/e", "Open editor", color_primary));
                 } else {
                     footer_spans.extend(kpill("Enter/+/-", "Cycle value", color_primary));
+                    footer_spans.extend(kpill("e", "Open editor", COLOR_DIM));
                 }
             }
             _ => {}
