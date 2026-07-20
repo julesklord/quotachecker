@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
+use std::io::{BufRead, BufReader};
 use std::process::Command;
 use std::sync::{Mutex, OnceLock};
 
@@ -1033,9 +1034,10 @@ impl AgentScanner {
                     for entry in entries.flatten() {
                         let path = entry.path();
                         if path.extension().and_then(|s| s.to_str()) == Some("log") {
-                            if let Ok(content) = fs::read_to_string(path) {
-                                let count = content
+                            if let Ok(file) = fs::File::open(&path) {
+                                let count = BufReader::new(file)
                                     .lines()
+                                    .map_while(Result::ok)
                                     .filter(|l| l.contains("Command:") || l.contains("Prompt:"))
                                     .count() as u32;
                                 agy_requests += count;
