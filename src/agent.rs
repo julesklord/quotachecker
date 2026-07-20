@@ -95,31 +95,6 @@ pub struct AgentState {
 
 pub struct AgentScanner;
 
-fn parse_agy_logs(log_dir_path: &Path) -> (u32, u32) {
-    let mut flash_count = 0;
-    let mut pro_count = 0;
-    if log_dir_path.exists() {
-        if let Ok(entries) = fs::read_dir(log_dir_path) {
-            for entry in entries.flatten() {
-                let path = entry.path();
-                if path.extension().and_then(|s| s.to_str()) == Some("log") {
-                    if let Ok(content) = fs::read_to_string(&path) {
-                        for line in content.lines() {
-                            if line.contains("Propagating selected model override to backend") {
-                                if line.contains("Flash") || line.contains("flash") {
-                                    flash_count += 1;
-                                } else if line.contains("Pro") || line.contains("pro") {
-                                    pro_count += 1;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-    (flash_count, pro_count)
-}
 
 fn get_cached_executable(cmd: &str) -> Option<String> {
     static CACHE: OnceLock<Mutex<HashMap<String, Option<String>>>> = OnceLock::new();
@@ -1006,6 +981,8 @@ impl AgentScanner {
 
         let mut agy_sessions = 0;
         let mut agy_requests = 0;
+        let mut agy_flash_count = 0;
+        let mut agy_pro_count = 0;
         let mut agy_auth = false;
         let mut agy_auth_info = "Not Configured".to_string();
         let agy_tier = if agy_exe.is_some() {
@@ -1034,11 +1011,20 @@ impl AgentScanner {
                         let path = entry.path();
                         if path.extension().and_then(|s| s.to_str()) == Some("log") {
                             if let Ok(content) = fs::read_to_string(path) {
-                                let count = content
-                                    .lines()
-                                    .filter(|l| l.contains("Command:") || l.contains("Prompt:"))
-                                    .count() as u32;
-                                agy_requests += count;
+                                let mut file_requests = 0;
+                                for line in content.lines() {
+                                    if line.contains("Command:") || line.contains("Prompt:") {
+                                        file_requests += 1;
+                                    }
+                                    if line.contains("Propagating selected model override to backend") {
+                                        if line.contains("Flash") || line.contains("flash") {
+                                            agy_flash_count += 1;
+                                        } else if line.contains("Pro") || line.contains("pro") {
+                                            agy_pro_count += 1;
+                                        }
+                                    }
+                                }
+                                agy_requests += file_requests;
                                 agy_sessions += 1;
                             }
                         }
@@ -1051,8 +1037,6 @@ impl AgentScanner {
             agy_requests = agy_sessions * 2;
         }
 
-        let log_dir = agy_config.join("log");
-        let (mut agy_flash_count, mut agy_pro_count) = parse_agy_logs(&log_dir);
         if agy_flash_count == 0 && agy_pro_count == 0 && agy_requests > 0 {
             agy_flash_count = (agy_requests * 7) / 10;
             agy_pro_count = agy_requests - agy_flash_count;
