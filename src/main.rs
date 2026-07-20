@@ -522,6 +522,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                             }
                         }
 
+                        KeyCode::Enter if app.active_tab == 1 || app.active_tab == 3 => {
+                            app.open_budget_modal();
+                        }
+
                         KeyCode::Enter if app.active_tab == 4 => {
                             if app.selected_setting_idx == 4 {
                                 let _ = disable_raw_mode();

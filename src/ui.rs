@@ -69,12 +69,23 @@ pub struct RenderContext<'a> {
 fn make_progress_bar(ratio: f64, width: usize) -> String {
     let filled = (ratio * width as f64).round() as usize;
     let mut bar = String::with_capacity(width * 3);
-    let full_count = if ratio < 1.0 { filled.saturating_sub(1) } else { filled }.min(width);
+    let full_count = if ratio < 1.0 {
+        filled.saturating_sub(1)
+    } else {
+        filled
+    }
+    .min(width);
     let has_half = filled > 0 && ratio < 1.0 && filled <= width;
-    for _ in 0..full_count { bar.push_str(SYM_BLOCK_FULL); }
-    if has_half { bar.push_str(SYM_BLOCK_HALF); }
+    for _ in 0..full_count {
+        bar.push_str(SYM_BLOCK_FULL);
+    }
+    if has_half {
+        bar.push_str(SYM_BLOCK_HALF);
+    }
     let empty_count = width.saturating_sub(full_count + if has_half { 1 } else { 0 });
-    for _ in 0..empty_count { bar.push_str(SYM_BLOCK_EMPTY); }
+    for _ in 0..empty_count {
+        bar.push_str(SYM_BLOCK_EMPTY);
+    }
     bar
 }
 
@@ -1150,7 +1161,7 @@ fn draw_agents_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
         && selected_agent.quota_type != crate::agent::QuotaType::Unlimited
     {
         hint_spans.push(Span::styled(
-            " s ",
+            " Enter / s ",
             Style::default().fg(Color::Black).bg(color_primary).bold(),
         ));
         hint_spans.push(Span::styled(
@@ -1325,7 +1336,7 @@ fn draw_quotas_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
             if agent.quota_type == crate::agent::QuotaType::Unlimited {
                 Cell::new("N/A - Unlimited").style(Style::default().fg(COLOR_MUTED).italic())
             } else {
-                Cell::new("Modify (s)").style(Style::default().fg(color_primary).italic())
+                Cell::new("Modify (Enter/s)").style(Style::default().fg(color_primary).italic())
             }
         } else {
             Cell::new("N/A - Telemetry Omitted").style(Style::default().fg(COLOR_MUTED))
@@ -1458,7 +1469,7 @@ fn draw_quotas_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
                     != crate::agent::QuotaType::Unlimited
             {
                 spans.push(Span::styled(
-                    " s ",
+                    " Enter / s ",
                     Style::default().fg(Color::Black).bg(color_primary).bold(),
                 ));
                 spans.push(Span::styled(
@@ -1698,7 +1709,7 @@ fn draw_footer(f: &mut Frame, area: Rect, ctx: &RenderContext) {
                     && ctx.agents[ctx.selected_agent_idx].quota_type
                         != crate::agent::QuotaType::Unlimited
                 {
-                    footer_spans.extend(kpill("s", "Edit quota", color_primary));
+                    footer_spans.extend(kpill("Enter/s", "Edit quota", color_primary));
                 }
             }
             4 => {

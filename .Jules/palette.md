@@ -57,3 +57,7 @@
 ## 2026-07-18 - Explicit Keybind Alternatives
 **Learning:** When alternative keybindings exist for the same action (e.g. 'e' and 'Enter' for opening an editor), omitting one from the footer hints leads to reduced discoverability and potential user frustration.
 **Action:** Always combine alternative keybindings in a single hint (e.g. 'Enter/e') if space allows to ensure maximum discoverability.
+
+## 2026-07-20 - Explicit Keybind Alternatives Must Work
+**Learning:** Advertising combined alternative keybindings in the UI (e.g., 'Enter/s') creates a strong expectation for the user. If the backend does not actually map the new alternative key to the action, the user perceives the application as broken.
+**Action:** When adding explicit keybind alternatives to the UI, always verify that the backend event handlers (e.g., in `main.rs`) correctly process both keycodes for the intended action.
