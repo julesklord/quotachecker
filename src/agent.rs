@@ -1646,6 +1646,28 @@ mod tests {
     }
 
     #[test]
+    fn test_get_cached_executable() {
+        let script = "#!/bin/sh\nif [ \"$1\" = \"--version\" ]; then\n    echo \"mock-app v1.0.0\"\n    exit 0\nfi\nexit 1\n";
+        let path = create_mock_executable("mock_cached_app", script);
+        let path_str = path.to_str().unwrap().to_string();
+
+        // First call should execute and cache
+        let res1 = get_cached_executable(&path_str);
+        assert_eq!(res1, Some(path_str.clone()));
+
+        // Remove the executable
+        let _ = fs::remove_file(&path);
+
+        // Second call should return cached value even though file is gone
+        let res2 = get_cached_executable(&path_str);
+        assert_eq!(res2, Some(path_str.clone()));
+
+        // Call with non-existent path
+        let res3 = get_cached_executable("/path/to/completely/nonexistent/executable/mock_app_12345");
+        assert_eq!(res3, None);
+    }
+
+    #[test]
     fn test_get_version_not_found() {
         let version = AgentScanner::get_version("/path/to/nonexistent/executable/mock_app");
         assert_eq!(version, None);
