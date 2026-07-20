@@ -259,7 +259,7 @@ pub(crate) fn decode_jwt_payload(jwt: &str) -> Option<serde_json::Value> {
     serde_json::from_slice(&decoded_bytes).ok()
 }
 
-fn parse_codex_auth(home_path: &Path) -> Option<(UserTier, String)> {
+pub(crate) fn parse_codex_auth(home_path: &Path) -> Option<(UserTier, String)> {
     let auth_path = home_path.join(".codex/auth.json");
     if !auth_path.exists() {
         return None;
@@ -1647,5 +1647,90 @@ mod tests {
     fn test_get_version_not_found() {
         let version = AgentScanner::get_version("/path/to/nonexistent/executable/mock_app");
         assert_eq!(version, None);
+    }
+
+    #[test]
+    fn test_parse_codex_auth_missing_file() {
+        let temp_dir = tempfile::tempdir().unwrap();
+        let result = parse_codex_auth(temp_dir.path());
+        assert_eq!(result, None);
+    }
+
+    #[test]
+    fn test_parse_codex_auth_invalid_json() {
+        let temp_dir = tempfile::tempdir().unwrap();
+        let codex_dir = temp_dir.path().join(".codex");
+        std::fs::create_dir_all(&codex_dir).unwrap();
+        let auth_path = codex_dir.join("auth.json");
+        std::fs::write(&auth_path, "invalid json").unwrap();
+
+        let result = parse_codex_auth(temp_dir.path());
+        assert_eq!(result, None);
+    }
+
+    #[test]
+    fn test_parse_codex_auth_missing_tokens() {
+        let temp_dir = tempfile::tempdir().unwrap();
+        let codex_dir = temp_dir.path().join(".codex");
+        std::fs::create_dir_all(&codex_dir).unwrap();
+        let auth_path = codex_dir.join("auth.json");
+        std::fs::write(&auth_path, r#"{"other_key": "value"}"#).unwrap();
+
+        let result = parse_codex_auth(temp_dir.path());
+        assert_eq!(result, None);
+    }
+
+    #[test]
+    fn test_parse_codex_auth_missing_id_token() {
+        let temp_dir = tempfile::tempdir().unwrap();
+        let codex_dir = temp_dir.path().join(".codex");
+        std::fs::create_dir_all(&codex_dir).unwrap();
+        let auth_path = codex_dir.join("auth.json");
+        std::fs::write(&auth_path, r#"{"tokens": {"access_token": "abc"}}"#).unwrap();
+
+        let result = parse_codex_auth(temp_dir.path());
+        assert_eq!(result, None);
+    }
+
+    #[test]
+    fn test_parse_codex_auth_invalid_jwt() {
+        let temp_dir = tempfile::tempdir().unwrap();
+        let codex_dir = temp_dir.path().join(".codex");
+        std::fs::create_dir_all(&codex_dir).unwrap();
+        let auth_path = codex_dir.join("auth.json");
+        std::fs::write(&auth_path, r#"{"tokens": {"access_token": "abc", "id_token": "invalid.jwt.string"}}"#).unwrap();
+
+        let result = parse_codex_auth(temp_dir.path());
+        assert_eq!(result, None);
+    }
+
+    #[test]
+    fn test_parse_codex_auth_success_free() {
+        let temp_dir = tempfile::tempdir().unwrap();
+        let codex_dir = temp_dir.path().join(".codex");
+        std::fs::create_dir_all(&codex_dir).unwrap();
+        let auth_path = codex_dir.join("auth.json");
+
+        let jwt = "eyJhbGciOiAiUlMyNTYifQ.eyJlbWFpbCI6ICJ1c2VyQGV4YW1wbGUuY29tIiwgImh0dHBzOi8vYXBpLm9wZW5haS5jb20vYXV0aCI6IHsiY2hhdGdwdF9wbGFuX3R5cGUiOiAiZnJlZSJ9fQ.dummy";
+        let json = format!(r#"{{"tokens": {{"access_token": "abc", "id_token": "{}"}}}}"#, jwt);
+        std::fs::write(&auth_path, json).unwrap();
+
+        let result = parse_codex_auth(temp_dir.path());
+        assert_eq!(result, Some((UserTier::OAuthPersonal, "user@example.com".to_string())));
+    }
+
+    #[test]
+    fn test_parse_codex_auth_success_enterprise() {
+        let temp_dir = tempfile::tempdir().unwrap();
+        let codex_dir = temp_dir.path().join(".codex");
+        std::fs::create_dir_all(&codex_dir).unwrap();
+        let auth_path = codex_dir.join("auth.json");
+
+        let jwt = "eyJhbGciOiAiUlMyNTYifQ.eyJlbWFpbCI6ICJ1c2VyQGV4YW1wbGUuY29tIiwgImh0dHBzOi8vYXBpLm9wZW5haS5jb20vYXV0aCI6IHsiY2hhdGdwdF9wbGFuX3R5cGUiOiAicGFpZCJ9fQ.dummy";
+        let json = format!(r#"{{"tokens": {{"access_token": "abc", "id_token": "{}"}}}}"#, jwt);
+        std::fs::write(&auth_path, json).unwrap();
+
+        let result = parse_codex_auth(temp_dir.path());
+        assert_eq!(result, Some((UserTier::OAuthEnterprise, "user@example.com".to_string())));
     }
 }
