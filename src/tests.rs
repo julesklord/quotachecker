@@ -35,10 +35,13 @@ mod unit_tests {
         use crate::agent::UserTier;
         assert_eq!(UserTier::LocalFree.display_name(), "Local (Free Tier)");
         assert_eq!(UserTier::Guest.display_name(), "Guest / Unauthenticated");
-        assert_eq!(
-            UserTier::NotInstalled.display_name(),
-            "Not Installed / Inactive"
-        );
+        assert_eq!(UserTier::PersonalFree.display_name(), "Personal (Free Tier)");
+        assert_eq!(UserTier::Enterprise.display_name(), "Enterprise Tier");
+        assert_eq!(UserTier::OAuthPersonal.display_name(), "OAuth (Personal)");
+        assert_eq!(UserTier::OAuthEnterprise.display_name(), "OAuth (Enterprise)");
+        assert_eq!(UserTier::ApiKeyStudio.display_name(), "API Key (Studio Tier)");
+        assert_eq!(UserTier::AdvancedCli.display_name(), "Advanced CLI Tier");
+        assert_eq!(UserTier::NotInstalled.display_name(), "Not Installed / Inactive");
     }
 
     #[test]
