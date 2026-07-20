@@ -1530,15 +1530,14 @@ mod tests {
     use std::fs;
     use std::os::unix::fs::PermissionsExt;
     use std::path::PathBuf;
-    use std::sync::atomic::{AtomicUsize, Ordering};
+    use std::time::SystemTime;
 
-    static MOCK_ID: AtomicUsize = AtomicUsize::new(0);
 
     fn create_mock_executable(name: &str, script_content: &str) -> PathBuf {
         let dir = std::env::temp_dir();
-        let id = MOCK_ID.fetch_add(1, Ordering::SeqCst);
+        let ts = SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_nanos();
         let pid = std::process::id();
-        let path = dir.join(format!("{}_{}_{}", name, pid, id));
+        let path = dir.join(format!("{}_{}_{}", name, pid, ts));
         fs::write(&path, script_content).unwrap();
         let mut perms = fs::metadata(&path).unwrap().permissions();
         perms.set_mode(0o755);
