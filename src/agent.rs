@@ -95,7 +95,6 @@ pub struct AgentState {
 
 pub struct AgentScanner;
 
-
 fn get_cached_executable(cmd: &str) -> Option<String> {
     static CACHE: OnceLock<Mutex<HashMap<String, Option<String>>>> = OnceLock::new();
     let map_mutex = CACHE.get_or_init(|| Mutex::new(HashMap::new()));
@@ -1032,7 +1031,9 @@ impl AgentScanner {
                                     if line.contains("Command:") || line.contains("Prompt:") {
                                         file_requests += 1;
                                     }
-                                    if line.contains("Propagating selected model override to backend") {
+                                    if line
+                                        .contains("Propagating selected model override to backend")
+                                    {
                                         if line.contains("Flash") || line.contains("flash") {
                                             agy_flash_count += 1;
                                         } else if line.contains("Pro") || line.contains("pro") {
@@ -1548,10 +1549,12 @@ mod tests {
     use std::path::PathBuf;
     use std::time::SystemTime;
 
-
     fn create_mock_executable(name: &str, script_content: &str) -> PathBuf {
         let dir = std::env::temp_dir();
-        let ts = SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_nanos();
+        let ts = SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_nanos();
         let pid = std::process::id();
         let path = dir.join(format!("{}_{}_{}", name, pid, ts));
         fs::write(&path, script_content).unwrap();
@@ -1697,7 +1700,11 @@ mod tests {
         let codex_dir = temp_dir.path().join(".codex");
         std::fs::create_dir_all(&codex_dir).unwrap();
         let auth_path = codex_dir.join("auth.json");
-        std::fs::write(&auth_path, r#"{"tokens": {"access_token": "abc", "id_token": "invalid.jwt.string"}}"#).unwrap();
+        std::fs::write(
+            &auth_path,
+            r#"{"tokens": {"access_token": "abc", "id_token": "invalid.jwt.string"}}"#,
+        )
+        .unwrap();
 
         let result = parse_codex_auth(temp_dir.path());
         assert_eq!(result, None);
@@ -1711,11 +1718,17 @@ mod tests {
         let auth_path = codex_dir.join("auth.json");
 
         let jwt = "eyJhbGciOiAiUlMyNTYifQ.eyJlbWFpbCI6ICJ1c2VyQGV4YW1wbGUuY29tIiwgImh0dHBzOi8vYXBpLm9wZW5haS5jb20vYXV0aCI6IHsiY2hhdGdwdF9wbGFuX3R5cGUiOiAiZnJlZSJ9fQ.dummy";
-        let json = format!(r#"{{"tokens": {{"access_token": "abc", "id_token": "{}"}}}}"#, jwt);
+        let json = format!(
+            r#"{{"tokens": {{"access_token": "abc", "id_token": "{}"}}}}"#,
+            jwt
+        );
         std::fs::write(&auth_path, json).unwrap();
 
         let result = parse_codex_auth(temp_dir.path());
-        assert_eq!(result, Some((UserTier::OAuthPersonal, "user@example.com".to_string())));
+        assert_eq!(
+            result,
+            Some((UserTier::OAuthPersonal, "user@example.com".to_string()))
+        );
     }
 
     #[test]
@@ -1726,10 +1739,16 @@ mod tests {
         let auth_path = codex_dir.join("auth.json");
 
         let jwt = "eyJhbGciOiAiUlMyNTYifQ.eyJlbWFpbCI6ICJ1c2VyQGV4YW1wbGUuY29tIiwgImh0dHBzOi8vYXBpLm9wZW5haS5jb20vYXV0aCI6IHsiY2hhdGdwdF9wbGFuX3R5cGUiOiAicGFpZCJ9fQ.dummy";
-        let json = format!(r#"{{"tokens": {{"access_token": "abc", "id_token": "{}"}}}}"#, jwt);
+        let json = format!(
+            r#"{{"tokens": {{"access_token": "abc", "id_token": "{}"}}}}"#,
+            jwt
+        );
         std::fs::write(&auth_path, json).unwrap();
 
         let result = parse_codex_auth(temp_dir.path());
-        assert_eq!(result, Some((UserTier::OAuthEnterprise, "user@example.com".to_string())));
+        assert_eq!(
+            result,
+            Some((UserTier::OAuthEnterprise, "user@example.com".to_string()))
+        );
     }
 }
