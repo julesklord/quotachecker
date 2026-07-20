@@ -345,16 +345,25 @@ impl AgentScanner {
 
         // Try common search paths as a bulletproof fallback
         let home = std::env::var("HOME").unwrap_or_else(|_| "/home/julesklord".to_string());
-        let common_paths = [
-            format!("/usr/bin/{}", cmd),
-            format!("/usr/local/bin/{}", cmd),
-            format!("{}/.local/bin/{}", home, cmd),
-            format!("{}/.npm-global/bin/{}", home, cmd),
-        ];
-        for path in &common_paths {
-            if Path::new(path).exists() {
-                return Some(path.clone());
-            }
+
+        let path = format!("/usr/bin/{}", cmd);
+        if Path::new(&path).exists() {
+            return Some(path);
+        }
+
+        let path = format!("/usr/local/bin/{}", cmd);
+        if Path::new(&path).exists() {
+            return Some(path);
+        }
+
+        let path = format!("{}/.local/bin/{}", home, cmd);
+        if Path::new(&path).exists() {
+            return Some(path);
+        }
+
+        let path = format!("{}/.npm-global/bin/{}", home, cmd);
+        if Path::new(&path).exists() {
+            return Some(path);
         }
 
         None
