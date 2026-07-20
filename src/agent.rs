@@ -187,15 +187,22 @@ fn seconds_until_monthly_reset() -> i64 {
     calculate_seconds_until_monthly_reset(chrono::Local::now())
 }
 
-pub(crate) fn base64_decode(input: &str) -> Option<Vec<u8>> {
+const fn build_decode_map() -> [u8; 256] {
     const ALPHABET: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
     let mut map = [255u8; 256];
-    for (i, &c) in ALPHABET.iter().enumerate() {
-        map[c as usize] = i as u8;
+    let mut i = 0;
+    while i < ALPHABET.len() {
+        map[ALPHABET[i] as usize] = i as u8;
+        i += 1;
     }
+    map
+}
 
+const DECODE_MAP: [u8; 256] = build_decode_map();
+
+pub(crate) fn base64_decode(input: &str) -> Option<Vec<u8>> {
     let bytes = input.as_bytes();
-    let mut out = Vec::new();
+    let mut out = Vec::with_capacity((bytes.len() * 3) / 4);
     let mut buffer = 0u32;
     let mut bits = 0;
 
@@ -203,7 +210,7 @@ pub(crate) fn base64_decode(input: &str) -> Option<Vec<u8>> {
         if b == b'=' {
             break;
         }
-        let val = map[b as usize];
+        let val = DECODE_MAP[b as usize];
         if val == 255 {
             continue;
         }
