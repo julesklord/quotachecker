@@ -68,19 +68,13 @@ pub struct RenderContext<'a> {
 
 fn make_progress_bar(ratio: f64, width: usize) -> String {
     let filled = (ratio * width as f64).round() as usize;
-    let mut bar = String::new();
-    for i in 0..width {
-        if i < filled {
-            // Use gradient blocks: full → half → empty
-            if i == filled.saturating_sub(1) && ratio < 1.0 {
-                bar.push_str(SYM_BLOCK_HALF);
-            } else {
-                bar.push_str(SYM_BLOCK_FULL);
-            }
-        } else {
-            bar.push_str(SYM_BLOCK_EMPTY);
-        }
-    }
+    let mut bar = String::with_capacity(width * 3);
+    let full_count = if ratio < 1.0 { filled.saturating_sub(1) } else { filled }.min(width);
+    let has_half = filled > 0 && ratio < 1.0 && filled <= width;
+    for _ in 0..full_count { bar.push_str(SYM_BLOCK_FULL); }
+    if has_half { bar.push_str(SYM_BLOCK_HALF); }
+    let empty_count = width.saturating_sub(full_count + if has_half { 1 } else { 0 });
+    for _ in 0..empty_count { bar.push_str(SYM_BLOCK_EMPTY); }
     bar
 }
 
