@@ -351,24 +351,25 @@ impl AgentScanner {
     }
 
     pub fn get_version(executable: &str) -> Option<String> {
-        let output_res = Command::new(executable).arg("--version").output();
-
-        let output = match output_res {
-            Ok(out) if out.status.success() => out,
-            _ => match Command::new(executable).arg("-v").output() {
-                Ok(out) if out.status.success() => out,
-                Ok(out) => out, // Command ran but failed, continue to fallback checks
-                Err(_) => {
-                    return Self::get_version_fallback(executable);
+        // Try `--version` first
+        if let Ok(output) = Command::new(executable).arg("--version").output() {
+            if output.status.success() {
+                let ver = String::from_utf8_lossy(&output.stdout).trim().to_string();
+                let first_line = ver.lines().next().unwrap_or("").to_string();
+                if !first_line.is_empty() {
+                    return Some(first_line);
                 }
-            },
-        };
+            }
+        }
 
-        if output.status.success() {
-            let ver = String::from_utf8_lossy(&output.stdout).trim().to_string();
-            let first_line = ver.lines().next().unwrap_or("").to_string();
-            if !first_line.is_empty() {
-                return Some(first_line);
+        // Fallback to `-v`
+        if let Ok(output) = Command::new(executable).arg("-v").output() {
+            if output.status.success() {
+                let ver = String::from_utf8_lossy(&output.stdout).trim().to_string();
+                let first_line = ver.lines().next().unwrap_or("").to_string();
+                if !first_line.is_empty() {
+                    return Some(first_line);
+                }
             }
         }
 
@@ -1663,7 +1664,8 @@ mod tests {
         assert_eq!(res2, Some(path_str.clone()));
 
         // Call with non-existent path
-        let res3 = get_cached_executable("/path/to/completely/nonexistent/executable/mock_app_12345");
+        let res3 =
+            get_cached_executable("/path/to/completely/nonexistent/executable/mock_app_12345");
         assert_eq!(res3, None);
     }
 
