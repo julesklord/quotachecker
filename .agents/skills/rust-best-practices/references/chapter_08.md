@@ -109,7 +109,7 @@ Don't leave `// TODO:` scattered around the codebase with no owner. Instead:
 2. Reference the issue in the code:
 
 ```rust
-// TODO(issue #42): Remove workaround after bugfix
+// TODO(#42): Remove workaround after bugfix
 ```
 
 This makes `TODO`s trackable, actionable and visible to everyone.
