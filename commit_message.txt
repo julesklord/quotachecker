@@ -1,5 +1,0 @@
-🧪 Add tests for AppConfig::load
-
-🎯 What: Addressed the testing gap for `AppConfig::load` by creating comprehensive tests in `src/config.rs`.
-📊 Coverage: Tested loading non-existent files (verifying default creation), valid JSON files, legacy JSON files (without `model_limits`), and invalid JSON files (verifying correct fallback and overwrite behavior). Added `#[serde(default)]` to `model_limits` to gracefully handle legacy config files.
-✨ Result: Improved test coverage and reliability for configuration loading.
