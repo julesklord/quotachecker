@@ -61,3 +61,6 @@
 ## 2026-07-20 - Explicit Keybind Alternatives Must Work
 **Learning:** Advertising combined alternative keybindings in the UI (e.g., 'Enter/s') creates a strong expectation for the user. If the backend does not actually map the new alternative key to the action, the user perceives the application as broken.
 **Action:** When adding explicit keybind alternatives to the UI, always verify that the backend event handlers (e.g., in `main.rs`) correctly process both keycodes for the intended action.
+## 2024-07-22 - Explicit Keybind Alternatives for Value Cycling and Quitting
+**Learning:** The application had several undocumented keybindings (`Esc` for quitting, `h`/`l` for cycling setting values) that were functional in the backend but invisible to the user. This creates a disconnect where power users or Vim users might try them, but regular users would be unaware they exist, reducing discoverability.
+**Action:** When keybindings have alternative options (like `+`/`-` vs `h`/`l` or `q` vs `Esc`), explicitly advertise them in the UI footer using combined string formats like `"Enter/+/-/h/l"` or `"q/Esc"` to ensure all users can discover the full range of supported inputs without guessing.
