@@ -507,7 +507,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                                 let editor =
                                     std::env::var("EDITOR").unwrap_or_else(|_| "nano".to_string());
                                 if let Some(path) = AppConfig::config_path() {
-                                    let _ = std::process::Command::new(editor).arg(&path).status();
+                                    if let Some(mut args) = shlex::split(&editor) {
+                                        if !args.is_empty() {
+                                            let program = args.remove(0);
+                                            let _ = std::process::Command::new(program)
+                                                .args(&args)
+                                                .arg(&path)
+                                                .status();
+                                        }
+                                    }
 
                                     *app.config.write().unwrap() = AppConfig::load();
                                     app.add_log(
@@ -535,7 +543,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                                 let editor =
                                     std::env::var("EDITOR").unwrap_or_else(|_| "nano".to_string());
                                 if let Some(path) = AppConfig::config_path() {
-                                    let _ = std::process::Command::new(editor).arg(&path).status();
+                                    if let Some(mut args) = shlex::split(&editor) {
+                                        if !args.is_empty() {
+                                            let program = args.remove(0);
+                                            let _ = std::process::Command::new(program)
+                                                .args(&args)
+                                                .arg(&path)
+                                                .status();
+                                        }
+                                    }
 
                                     *app.config.write().unwrap() = AppConfig::load();
                                     app.add_log(

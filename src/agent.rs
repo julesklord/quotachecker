@@ -1663,7 +1663,8 @@ mod tests {
         assert_eq!(res2, Some(path_str.clone()));
 
         // Call with non-existent path
-        let res3 = get_cached_executable("/path/to/completely/nonexistent/executable/mock_app_12345");
+        let res3 =
+            get_cached_executable("/path/to/completely/nonexistent/executable/mock_app_12345");
         assert_eq!(res3, None);
     }
 
