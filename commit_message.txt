@@ -1,5 +1,6 @@
-🧪 Add tests for AppConfig::load
+🧹 [Code Health] Remove hardcoded home directory fallback
 
-🎯 What: Addressed the testing gap for `AppConfig::load` by creating comprehensive tests in `src/config.rs`.
-📊 Coverage: Tested loading non-existent files (verifying default creation), valid JSON files, legacy JSON files (without `model_limits`), and invalid JSON files (verifying correct fallback and overwrite behavior). Added `#[serde(default)]` to `model_limits` to gracefully handle legacy config files.
-✨ Result: Improved test coverage and reliability for configuration loading.
+🎯 What: Removed the hardcoded fallback paths of `"/home/julesklord"` in `src/agent.rs` and replaced them with standard, generic home directory resolution.
+💡 Why: Improves maintainability and code health by making the fallback robust and independent of specific user accounts, eliminating a likely cause of cross-environment bugs.
+✅ Verification: Ran `cargo test`, `cargo build`, and `cargo clippy -- -D warnings` successfully.
+✨ Result: The codebase is cleaner, safely defaults to `"~"`, and utilizes `directories::BaseDirs::new()` where applicable.
