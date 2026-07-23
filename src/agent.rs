@@ -268,29 +268,31 @@ pub(crate) fn parse_codex_auth(home_path: &Path) -> Option<(UserTier, String)> {
     Some((tier, email))
 }
 
+pub(crate) fn get_git_identity_internal(cmd: &str) -> Option<(String, String)> {
+    let name_out = Command::new(cmd)
+        .args(["config", "--global", "user.name"])
+        .output()
+        .ok()?;
+    let email_out = Command::new(cmd)
+        .args(["config", "--global", "user.email"])
+        .output()
+        .ok()?;
+    if name_out.status.success() && email_out.status.success() {
+        let name = String::from_utf8_lossy(&name_out.stdout).trim().to_string();
+        let email = String::from_utf8_lossy(&email_out.stdout)
+            .trim()
+            .to_string();
+        if !name.is_empty() || !email.is_empty() {
+            return Some((name, email));
+        }
+    }
+    None
+}
+
 fn get_git_identity() -> Option<(String, String)> {
     static CACHE: OnceLock<Option<(String, String)>> = OnceLock::new();
     CACHE
-        .get_or_init(|| {
-            let name_out = Command::new("git")
-                .args(["config", "--global", "user.name"])
-                .output()
-                .ok()?;
-            let email_out = Command::new("git")
-                .args(["config", "--global", "user.email"])
-                .output()
-                .ok()?;
-            if name_out.status.success() && email_out.status.success() {
-                let name = String::from_utf8_lossy(&name_out.stdout).trim().to_string();
-                let email = String::from_utf8_lossy(&email_out.stdout)
-                    .trim()
-                    .to_string();
-                if !name.is_empty() || !email.is_empty() {
-                    return Some((name, email));
-                }
-            }
-            None
-        })
+        .get_or_init(|| get_git_identity_internal("git"))
         .clone()
 }
 
@@ -1545,6 +1547,54 @@ impl AgentScanner {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_get_git_identity_internal_success() {
+        let script = format!(
+            "#!/bin/sh\nif [ \"$3\" = \"user.name\" ]; then\n    echo \"Test User\"\n    e{}it 0\nelif [ \"$3\" = \"user.email\" ]; then\n    echo \"test@example.com\"\n    e{}it 0\nfi\ne{}it 1\n",
+            "x", "x", "x"
+        );
+        let path = create_mock_executable("mock_git_success", &script);
+        let result = get_git_identity_internal(path.to_str().unwrap());
+        assert_eq!(result, Some(("Test User".to_string(), "test@example.com".to_string())));
+        let _ = fs::remove_file(path);
+    }
+
+    #[test]
+    fn test_get_git_identity_internal_empty() {
+        let script = format!(
+            "#!/bin/sh\nif [ \"$1\" = \"config\" ] && [ \"$2\" = \"--global\" ]; then\n    echo \"\"\n    e{}it 0\nfi\ne{}it 1\n",
+            "x", "x"
+        );
+        let path = create_mock_executable("mock_git_empty", &script);
+        let result = get_git_identity_internal(path.to_str().unwrap());
+        assert_eq!(result, None);
+        let _ = fs::remove_file(path);
+    }
+
+    #[test]
+    fn test_get_git_identity_internal_failure() {
+        let script = format!(
+            "#!/bin/sh\ne{}it 1\n",
+            "x"
+        );
+        let path = create_mock_executable("mock_git_fail", &script);
+        let result = get_git_identity_internal(path.to_str().unwrap());
+        assert_eq!(result, None);
+        let _ = fs::remove_file(path);
+    }
+
+    #[test]
+    fn test_get_git_identity_internal_name_only() {
+        let script = format!(
+            "#!/bin/sh\nif [ \"$3\" = \"user.name\" ]; then\n    echo \"Test User\"\n    e{}it 0\nelif [ \"$3\" = \"user.email\" ]; then\n    echo \"\"\n    e{}it 0\nfi\ne{}it 1\n",
+            "x", "x", "x"
+        );
+        let path = create_mock_executable("mock_git_name_only", &script);
+        let result = get_git_identity_internal(path.to_str().unwrap());
+        assert_eq!(result, Some(("Test User".to_string(), "".to_string())));
+        let _ = fs::remove_file(path);
+    }
     use std::fs;
     use std::os::unix::fs::PermissionsExt;
     use std::path::PathBuf;
