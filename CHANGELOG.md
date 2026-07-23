@@ -5,6 +5,24 @@ Format: [keepachangelog.com](https://keepachangelog.com) · Versioning: [semver.
 
 ## [Unreleased]
 
+## [0.5.2] - 2026-07-23
+
+### Security
+- Fixed command injection vulnerability via the `EDITOR` environment variable.
+
+### Added
+- Explicit keybind hints in Palette for improved discoverability across settings, agent detail, and footer.
+- Tests for `parse_codex_auth`, `get_cached_executable` cache behavior, and `UserTier::display_name`.
+
+### Changed
+- Optimized agy log parsing and progress bar rendering.
+- Lazy string allocations in fallback paths for reduced allocations.
+- Extracted base64 mapping to a constant; removed unused `MOCK_ID`.
+
+### Fixed
+- Refactored `get_version` in `src/agent.rs` to avoid intermittent CI failures from matched error cases falling through.
+- Clarified settings affordances and fixed pluralization in Palette.
+
 ## [0.5.0] - 2026-06-30
 
 ### Added
