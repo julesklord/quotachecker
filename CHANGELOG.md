@@ -5,6 +5,27 @@ Format: [keepachangelog.com](https://keepachangelog.com) · Versioning: [semver.
 
 ## [Unreleased]
 
+## [0.5.3] - 2026-07-23
+
+### Changed
+- Centralized tier limits and model limits into `default_tier_limit()`, `effective_limit()`, and `build_model_usages()` helper functions, eliminating duplicated logic across all 9 agents.
+- Agy model ratios corrected: Flash 70%/Pro 30% (was 300%/10%, which exceeded total quota).
+- All agents now use `effective_limit()` for consistent quota resolution with custom override support.
+
+### Added
+- Tier detection for **Aider**: detects Anthropic/OpenAI provider from env vars (`ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `CLAUDE_API_KEY`) and `~/.aider.conf.yml` config.
+- Tier detection for **Continue**: reads `~/.continue/config.json` models array to detect provider and tier.
+- Tier detection for **Cody**: detects Sourcegraph Enterprise via `SOURCEGRAPH_ACCESS_TOKEN` / `SG_ACCESS_TOKEN` env vars and config `enterprise` flag.
+- Tier detection for **Supermaven**: detects Pro tier via `SUPERMAVEN_API_KEY` env var and config file.
+- Tier detection for **Agy**: distinguishes `AdvancedCli` vs `PersonalFree` based on Google API keys and settings.json presence.
+- `ModelCounts` struct for structured model usage breakdowns.
+- 10 new unit tests for `default_tier_limit`, `effective_limit`, and `build_model_usages`.
+
+### Fixed
+- Agy Flash model limit no longer exceeds total quota (was `3.0 * L`, now `0.70 * L`).
+- Agy Pro model limit no longer too low (was `0.1 * L`, now `0.30 * L`).
+- Auth info strings now reflect detected provider for Aider, Continue, Cody, Supermaven.
+
 ## [0.5.2] - 2026-07-23
 
 ### Security

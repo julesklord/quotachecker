@@ -186,6 +186,265 @@ fn seconds_until_monthly_reset() -> i64 {
     calculate_seconds_until_monthly_reset(chrono::Local::now())
 }
 
+// ─── Tier & Model Limit Helpers ───────────────────────────────────────────────
+
+pub(crate) fn default_tier_limit(agent: AgentId, tier: UserTier) -> u32 {
+    match agent {
+        AgentId::Codex => match tier {
+            UserTier::OAuthEnterprise => 2000,
+            UserTier::OAuthPersonal => 200,
+            UserTier::LocalFree => 50,
+            _ => 0,
+        },
+        AgentId::OpenCode => match tier {
+            UserTier::Enterprise => 2000,
+            UserTier::PersonalFree => 1000,
+            UserTier::Guest => 200,
+            _ => 0,
+        },
+        AgentId::Agy => match tier {
+            UserTier::AdvancedCli => 500,
+            UserTier::PersonalFree => 200,
+            _ => 0,
+        },
+        AgentId::Zed => match tier {
+            UserTier::OAuthEnterprise => 500,
+            UserTier::OAuthPersonal => 300,
+            UserTier::PersonalFree => 100,
+            _ => 0,
+        },
+        AgentId::Aider => match tier {
+            UserTier::Enterprise => 500,
+            UserTier::PersonalFree | UserTier::LocalFree => 200,
+            _ => 0,
+        },
+        AgentId::Ollama => match tier {
+            UserTier::LocalFree => 1000,
+            _ => 0,
+        },
+        AgentId::Continue => match tier {
+            UserTier::Enterprise => 1000,
+            UserTier::PersonalFree | UserTier::LocalFree => 500,
+            _ => 0,
+        },
+        AgentId::Cody => match tier {
+            UserTier::Enterprise => 800,
+            UserTier::PersonalFree | UserTier::LocalFree => 400,
+            _ => 0,
+        },
+        AgentId::Supermaven => match tier {
+            UserTier::Enterprise => 5000,
+            UserTier::PersonalFree | UserTier::LocalFree => 2000,
+            _ => 0,
+        },
+    }
+}
+
+pub(crate) fn effective_limit(
+    config_settings: &crate::config::AgentQuotaSettings,
+    agent: AgentId,
+    tier: UserTier,
+) -> u32 {
+    if config_settings.custom {
+        config_settings.limit
+    } else {
+        default_tier_limit(agent, tier)
+    }
+}
+
+#[derive(Default)]
+pub(crate) struct ModelCounts {
+    pub gpt5: u32,
+    pub gpt41: u32,
+    pub claude47: u32,
+    pub gpt4o: u32,
+    pub gpt4o_mini: u32,
+    pub deepseek_chat: u32,
+    pub deepseek_reasoner: u32,
+    pub gemini_flash: u32,
+    pub gemini_pro: u32,
+    pub llama3: u32,
+    pub mistral: u32,
+}
+
+pub(crate) fn build_model_usages(
+    agent: AgentId,
+    tier: UserTier,
+    limit: u32,
+    counts: &ModelCounts,
+    provider: &str,
+) -> Vec<ModelUsage> {
+    match agent {
+        AgentId::Codex => {
+            let (lg5, lg41, lc47) = match tier {
+                UserTier::OAuthEnterprise | UserTier::OAuthPersonal => (
+                    (limit as f64 * 0.25) as u32,
+                    (limit as f64 * 0.50) as u32,
+                    (limit as f64 * 0.75) as u32,
+                ),
+                UserTier::LocalFree => (
+                    (limit as f64 * 0.20) as u32,
+                    (limit as f64 * 0.40) as u32,
+                    (limit as f64 * 0.60) as u32,
+                ),
+                _ => (0, 0, 0),
+            };
+            vec![
+                ModelUsage { name: "gpt-5".into(), requests_used: counts.gpt5, limit: lg5 },
+                ModelUsage { name: "gpt-4.1".into(), requests_used: counts.gpt41, limit: lg41 },
+                ModelUsage { name: "claude-4.7".into(), requests_used: counts.claude47, limit: lc47 },
+            ]
+        }
+        AgentId::OpenCode => match provider {
+            "GitHub Copilot" => {
+                let (lg5, lg41, lc47) = match tier {
+                    UserTier::Enterprise => (
+                        (limit as f64 * 0.25) as u32,
+                        (limit as f64 * 0.50) as u32,
+                        (limit as f64 * 0.75) as u32,
+                    ),
+                    UserTier::PersonalFree | UserTier::Guest => (
+                        (limit as f64 * 0.05) as u32,
+                        (limit as f64 * 0.10) as u32,
+                        (limit as f64 * 0.15) as u32,
+                    ),
+                    _ => (0, 0, 0),
+                };
+                vec![
+                    ModelUsage { name: "gpt-5".into(), requests_used: counts.gpt5, limit: lg5 },
+                    ModelUsage { name: "gpt-4.1".into(), requests_used: counts.gpt41, limit: lg41 },
+                    ModelUsage { name: "claude-4.7".into(), requests_used: counts.claude47, limit: lc47 },
+                ]
+            }
+            "OpenAI" => {
+                let (lg4o, lg4om) = match tier {
+                    UserTier::Enterprise => (
+                        (limit as f64 * 0.25) as u32,
+                        (limit as f64 * 1.0) as u32,
+                    ),
+                    UserTier::PersonalFree => (
+                        (limit as f64 * 0.05) as u32,
+                        (limit as f64 * 0.20) as u32,
+                    ),
+                    UserTier::Guest => (
+                        (limit as f64 * 0.05) as u32,
+                        (limit as f64 * 0.25) as u32,
+                    ),
+                    _ => (0, 0),
+                };
+                vec![
+                    ModelUsage { name: "gpt-4o".into(), requests_used: counts.gpt4o, limit: lg4o },
+                    ModelUsage { name: "gpt-4o-mini".into(), requests_used: counts.gpt4o_mini, limit: lg4om },
+                ]
+            }
+            "Anthropic Claude" => {
+                let lc = match tier {
+                    UserTier::Enterprise => (limit as f64 * 0.75) as u32,
+                    UserTier::PersonalFree | UserTier::Guest => (limit as f64 * 0.15) as u32,
+                    _ => 0,
+                };
+                vec![
+                    ModelUsage { name: "claude-4.7".into(), requests_used: counts.gpt4o, limit: lc },
+                    ModelUsage { name: "claude-4.7".into(), requests_used: counts.gpt4o_mini, limit: lc },
+                ]
+            }
+            _ => {
+                let (lds, ldr) = match tier {
+                    UserTier::Enterprise => (
+                        (limit as f64 * 0.75) as u32,
+                        (limit as f64 * 0.25) as u32,
+                    ),
+                    UserTier::PersonalFree | UserTier::Guest => (
+                        (limit as f64 * 0.15) as u32,
+                        (limit as f64 * 0.05) as u32,
+                    ),
+                    _ => (0, 0),
+                };
+                vec![
+                    ModelUsage { name: "deepseek-chat".into(), requests_used: counts.deepseek_chat, limit: lds },
+                    ModelUsage { name: "deepseek-reasoner".into(), requests_used: counts.deepseek_reasoner, limit: ldr },
+                ]
+            }
+        },
+        AgentId::Agy => {
+            let (lf, lp) = match tier {
+                UserTier::AdvancedCli => (
+                    (limit as f64 * 0.70) as u32,
+                    (limit as f64 * 0.30) as u32,
+                ),
+                UserTier::PersonalFree => (
+                    (limit as f64 * 0.80) as u32,
+                    (limit as f64 * 0.20) as u32,
+                ),
+                _ => (0, 0),
+            };
+            vec![
+                ModelUsage { name: "Gemini 3.5 Flash".into(), requests_used: counts.gemini_flash, limit: lf },
+                ModelUsage { name: "Gemini 3.1 Pro".into(), requests_used: counts.gemini_pro, limit: lp },
+            ]
+        }
+        AgentId::Zed => {
+            let lc = match tier {
+                UserTier::OAuthEnterprise => (limit as f64 * 0.60) as u32,
+                UserTier::OAuthPersonal => (limit as f64 * 0.50) as u32,
+                UserTier::PersonalFree => (limit as f64 * 0.30) as u32,
+                _ => 0,
+            };
+            vec![
+                ModelUsage { name: "claude-4.7".into(), requests_used: counts.claude47, limit: lc },
+            ]
+        }
+        AgentId::Aider => {
+            let (la, lg) = match tier {
+                UserTier::Enterprise => (
+                    (limit as f64 * 0.60) as u32,
+                    (limit as f64 * 0.40) as u32,
+                ),
+                _ => (
+                    (limit as f64 * 0.60) as u32,
+                    (limit as f64 * 0.40) as u32,
+                ),
+            };
+            vec![
+                ModelUsage { name: "claude-3-5-sonnet".into(), requests_used: counts.claude47, limit: la },
+                ModelUsage { name: "gpt-4o".into(), requests_used: counts.gpt4o, limit: lg },
+            ]
+        }
+        AgentId::Ollama => {
+            vec![
+                ModelUsage { name: "llama3".into(), requests_used: counts.llama3, limit: (limit as f64 * 0.7) as u32 },
+                ModelUsage { name: "mistral".into(), requests_used: counts.mistral, limit: (limit as f64 * 0.3) as u32 },
+            ]
+        }
+        AgentId::Continue => {
+            let (lg, lc) = match tier {
+                UserTier::Enterprise => (
+                    (limit as f64 * 0.50) as u32,
+                    (limit as f64 * 0.50) as u32,
+                ),
+                _ => (
+                    (limit as f64 * 0.80) as u32,
+                    (limit as f64 * 0.20) as u32,
+                ),
+            };
+            vec![
+                ModelUsage { name: "gpt-4o-mini".into(), requests_used: counts.gpt4o_mini, limit: lg },
+                ModelUsage { name: "claude-3-5-sonnet".into(), requests_used: counts.claude47, limit: lc },
+            ]
+        }
+        AgentId::Cody => {
+            vec![
+                ModelUsage { name: "claude-3-5-sonnet".into(), requests_used: counts.claude47, limit },
+            ]
+        }
+        AgentId::Supermaven => {
+            vec![
+                ModelUsage { name: "supermaven-model".into(), requests_used: counts.gpt5, limit },
+            ]
+        }
+    }
+}
+
 const fn build_decode_map() -> [u8; 256] {
     const ALPHABET: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
     let mut map = [255u8; 256];
@@ -499,48 +758,15 @@ impl AgentScanner {
             claude4_count = codex_requests - gpt5_count - gpt41_count;
         }
 
-        let default_tier_limit = match codex_tier {
-            UserTier::OAuthEnterprise => 2000,
-            UserTier::OAuthPersonal => 200,
-            UserTier::LocalFree => 50,
-            _ => 0,
-        };
-        let codex_limit = if config.codex_quota.custom {
-            config.codex_quota.limit
-        } else {
-            default_tier_limit
-        };
+        let codex_limit = effective_limit(&config.codex_quota, AgentId::Codex, codex_tier);
 
-        let (limit_gpt5, limit_gpt41, limit_claude47) = match codex_tier {
-            UserTier::OAuthEnterprise | UserTier::OAuthPersonal => (
-                (codex_limit as f64 * 0.25) as u32,
-                (codex_limit as f64 * 0.50) as u32,
-                (codex_limit as f64 * 0.75) as u32,
-            ),
-            UserTier::LocalFree => (
-                (codex_limit as f64 * 0.20) as u32,
-                (codex_limit as f64 * 0.40) as u32,
-                (codex_limit as f64 * 0.60) as u32,
-            ),
-            _ => (0, 0, 0),
+        let codex_model_counts = ModelCounts {
+            gpt5: gpt5_count,
+            gpt41: gpt41_count,
+            claude47: claude4_count,
+            ..Default::default()
         };
-        let codex_model_usages = vec![
-            ModelUsage {
-                name: "gpt-5".to_string(),
-                requests_used: gpt5_count,
-                limit: limit_gpt5,
-            },
-            ModelUsage {
-                name: "gpt-4.1".to_string(),
-                requests_used: gpt41_count,
-                limit: limit_gpt41,
-            },
-            ModelUsage {
-                name: "claude-4.7".to_string(),
-                requests_used: claude4_count,
-                limit: limit_claude47,
-            },
-        ];
+        let codex_model_usages = build_model_usages(AgentId::Codex, codex_tier, codex_limit, &codex_model_counts, "");
 
         let codex_used = codex_requests;
         let codex_rem = codex_limit.saturating_sub(codex_used);
@@ -842,17 +1068,7 @@ impl AgentScanner {
             ds_reasoner_count = opencode_requests - ds_coder_count;
         }
 
-        let default_tier_limit = match opencode_tier {
-            UserTier::Enterprise => 2000,
-            UserTier::PersonalFree => 1000,
-            UserTier::Guest => 200,
-            _ => 0,
-        };
-        let opencode_limit = if config.opencode_quota.custom {
-            config.opencode_quota.limit
-        } else {
-            default_tier_limit
-        };
+        let opencode_limit = effective_limit(&config.opencode_quota, AgentId::OpenCode, opencode_tier);
 
         let mut opencode_model_usages = Vec::new();
         if opencode_provider == "GitHub Copilot" {
@@ -984,7 +1200,7 @@ impl AgentScanner {
         });
 
         // ----------------------------------------------------
-        // 3. AGY AGENT
+        // 3. AGY AGENT (Gemini Antigravity CLI)
         // ----------------------------------------------------
         let agy_exe = get_cached_executable("agy");
         let agy_ver = agy_exe.as_ref().and_then(|e| get_cached_version(e));
@@ -1001,7 +1217,7 @@ impl AgentScanner {
         let mut agy_pro_count = 0;
         let mut agy_auth = false;
         let mut agy_auth_info = "Not Configured".to_string();
-        let agy_tier = if agy_exe.is_some() {
+        let mut agy_tier = if agy_exe.is_some() {
             UserTier::AdvancedCli
         } else {
             UserTier::NotInstalled
@@ -1010,6 +1226,15 @@ impl AgentScanner {
         if agy_exe.is_some() && agy_config.exists() {
             agy_auth = true;
             agy_auth_info = "Ready".to_string();
+
+            // Detect tier based on Google auth tokens
+            let has_google_auth = std::env::var("GOOGLE_API_KEY").is_ok()
+                || std::env::var("GEMINI_API_KEY").is_ok();
+            let advanced_config = agy_config.join("settings.json");
+            if !advanced_config.exists() && !has_google_auth {
+                agy_tier = UserTier::PersonalFree;
+                agy_auth_info = "Free Tier (No API Key)".to_string();
+            }
 
             let last_conv_path = agy_config.join("cache/last_conversations.json");
             if last_conv_path.exists() {
@@ -1060,35 +1285,14 @@ impl AgentScanner {
             agy_pro_count = agy_requests - agy_flash_count;
         }
 
-        let default_tier_limit = match agy_tier {
-            UserTier::AdvancedCli => 500,
-            _ => 0,
-        };
-        let agy_limit = if config.agy_quota.custom {
-            config.agy_quota.limit
-        } else {
-            default_tier_limit
-        };
+        let agy_limit = effective_limit(&config.agy_quota, AgentId::Agy, agy_tier);
 
-        let (limit_flash, limit_pro) = match agy_tier {
-            UserTier::AdvancedCli => (
-                (agy_limit as f64 * 3.0) as u32,
-                (agy_limit as f64 * 0.1) as u32,
-            ),
-            _ => (0, 0),
+        let agy_model_counts = ModelCounts {
+            gemini_flash: agy_flash_count,
+            gemini_pro: agy_pro_count,
+            ..Default::default()
         };
-        let agy_model_usages = vec![
-            ModelUsage {
-                name: "Gemini 3.5 Flash".to_string(),
-                requests_used: agy_flash_count,
-                limit: limit_flash,
-            },
-            ModelUsage {
-                name: "Gemini 3.1 Pro".to_string(),
-                requests_used: agy_pro_count,
-                limit: limit_pro,
-            },
-        ];
+        let agy_model_usages = build_model_usages(AgentId::Agy, agy_tier, agy_limit, &agy_model_counts, "");
 
         let agy_used = agy_requests;
         let agy_rem = agy_limit.saturating_sub(agy_used);
@@ -1119,7 +1323,7 @@ impl AgentScanner {
         });
 
         // ----------------------------------------------------
-        // 5. ZED AGENT
+        // 4. ZED AGENT
         // ----------------------------------------------------
         let zed_exe = get_cached_executable("zeditor");
         let zed_ver = zed_exe.as_ref().and_then(|e| get_cached_version(e));
@@ -1152,44 +1356,19 @@ impl AgentScanner {
                         conn.query_row("SELECT count(*) FROM threads", [], |r| r.get::<_, u32>(0))
                     {
                         zed_sessions = count;
-                        zed_requests = count * 8; // estimate 8 requests per thread
+                        zed_requests = count * 8;
                     }
                 }
             }
         }
 
-        let mut zed_sonnet_count = 0;
-        let mut zed_haiku_count = 0;
-        if zed_requests > 0 {
-            zed_sonnet_count = (zed_requests * 8) / 10;
-            zed_haiku_count = zed_requests - zed_sonnet_count;
-        }
-        let default_tier_limit = match zed_tier {
-            UserTier::OAuthPersonal => 300,
-            _ => 0,
-        };
-        let zed_limit = if config.zed_quota.custom {
-            config.zed_quota.limit
-        } else {
-            default_tier_limit
-        };
+        let zed_limit = effective_limit(&config.zed_quota, AgentId::Zed, zed_tier);
 
-        let limit_claude = match zed_tier {
-            UserTier::OAuthPersonal => (zed_limit as f64 * 0.5) as u32,
-            _ => 0,
+        let zed_model_counts = ModelCounts {
+            claude47: zed_requests,
+            ..Default::default()
         };
-        let zed_model_usages = vec![
-            ModelUsage {
-                name: "claude-4.7".to_string(),
-                requests_used: zed_sonnet_count,
-                limit: limit_claude,
-            },
-            ModelUsage {
-                name: "claude-4.7".to_string(),
-                requests_used: zed_haiku_count,
-                limit: limit_claude,
-            },
-        ];
+        let zed_model_usages = build_model_usages(AgentId::Zed, zed_tier, zed_limit, &zed_model_counts, "");
 
         let zed_used = zed_requests;
         let zed_rem = zed_limit.saturating_sub(zed_used);
@@ -1235,30 +1414,49 @@ impl AgentScanner {
             None
         };
         let aider_installed = aider_exe.is_some();
-        let aider_tier = if aider_installed {
+        let mut aider_tier = if aider_installed {
             UserTier::LocalFree
         } else {
             UserTier::NotInstalled
         };
-        let aider_limit = if config.aider_quota.custom {
-            config.aider_quota.limit
-        } else {
-            200
-        };
+        let mut aider_provider = "Local".to_string();
+
+        if aider_installed {
+            // Detect provider from env vars
+            if std::env::var("ANTHROPIC_API_KEY").is_ok()
+                || std::env::var("CLAUDE_API_KEY").is_ok()
+            {
+                aider_tier = UserTier::Enterprise;
+                aider_provider = "Anthropic".to_string();
+            } else if std::env::var("OPENAI_API_KEY").is_ok() {
+                aider_tier = UserTier::PersonalFree;
+                aider_provider = "OpenAI".to_string();
+            }
+
+            // Detect provider from config file
+            if aider_tier == UserTier::LocalFree && aider_config.exists() {
+                if let Ok(content) = fs::read_to_string(&aider_config) {
+                    let lower = content.to_lowercase();
+                    if lower.contains("anthropic") || lower.contains("claude") {
+                        aider_tier = UserTier::Enterprise;
+                        aider_provider = "Anthropic".to_string();
+                    } else if lower.contains("openai") || lower.contains("gpt") {
+                        aider_tier = UserTier::PersonalFree;
+                        aider_provider = "OpenAI".to_string();
+                    }
+                }
+            }
+        }
+
+        let aider_limit = effective_limit(&config.aider_quota, AgentId::Aider, aider_tier);
         let aider_used = if aider_installed { 15 } else { 0 };
         let aider_rem = aider_limit.saturating_sub(aider_used);
-        let aider_model_usages = vec![
-            ModelUsage {
-                name: "claude-3-5-sonnet".to_string(),
-                requests_used: (aider_used as f64 * 0.6) as u32,
-                limit: (aider_limit as f64 * 0.6) as u32,
-            },
-            ModelUsage {
-                name: "gpt-4o".to_string(),
-                requests_used: (aider_used as f64 * 0.4) as u32,
-                limit: (aider_limit as f64 * 0.4) as u32,
-            },
-        ];
+        let aider_model_counts = ModelCounts {
+            claude47: (aider_used as f64 * 0.6) as u32,
+            gpt4o: (aider_used as f64 * 0.4) as u32,
+            ..Default::default()
+        };
+        let aider_model_usages = build_model_usages(AgentId::Aider, aider_tier, aider_limit, &aider_model_counts, &aider_provider);
         agents.push(AgentState {
             id: AgentId::Aider,
             name: "Aider".to_string(),
@@ -1267,7 +1465,7 @@ impl AgentScanner {
             config_path: aider_config_str,
             is_authenticated: aider_installed,
             auth_info: if aider_installed {
-                "API Key".to_string()
+                format!("{} API", aider_provider)
             } else {
                 "Not Configured".to_string()
             },
@@ -1305,25 +1503,15 @@ impl AgentScanner {
         } else {
             UserTier::NotInstalled
         };
-        let ollama_limit = if config.ollama_quota.custom {
-            config.ollama_quota.limit
-        } else {
-            1000
-        };
+        let ollama_limit = effective_limit(&config.ollama_quota, AgentId::Ollama, ollama_tier);
         let ollama_used = if ollama_installed { 120 } else { 0 };
         let ollama_rem = ollama_limit.saturating_sub(ollama_used);
-        let ollama_model_usages = vec![
-            ModelUsage {
-                name: "llama3".to_string(),
-                requests_used: (ollama_used as f64 * 0.7) as u32,
-                limit: (ollama_limit as f64 * 0.7) as u32,
-            },
-            ModelUsage {
-                name: "mistral".to_string(),
-                requests_used: (ollama_used as f64 * 0.3) as u32,
-                limit: (ollama_limit as f64 * 0.3) as u32,
-            },
-        ];
+        let ollama_model_counts = ModelCounts {
+            llama3: (ollama_used as f64 * 0.7) as u32,
+            mistral: (ollama_used as f64 * 0.3) as u32,
+            ..Default::default()
+        };
+        let ollama_model_usages = build_model_usages(AgentId::Ollama, ollama_tier, ollama_limit, &ollama_model_counts, "");
         agents.push(AgentState {
             id: AgentId::Ollama,
             name: "Ollama".to_string(),
@@ -1365,30 +1553,50 @@ impl AgentScanner {
             None
         };
         let continue_installed = continue_exe.is_some();
-        let continue_tier = if continue_installed {
+        let mut continue_tier = if continue_installed {
             UserTier::LocalFree
         } else {
             UserTier::NotInstalled
         };
-        let continue_limit = if config.continue_quota.custom {
-            config.continue_quota.limit
-        } else {
-            500
-        };
+        let mut continue_provider = "Local".to_string();
+
+        if continue_installed && continue_config.exists() {
+            if let Ok(content) = fs::read_to_string(&continue_config) {
+                if let Ok(val) = serde_json::from_str::<serde_json::Value>(&content) {
+                    if let Some(models) = val.get("models").and_then(|m| m.as_array()) {
+                        for model in models {
+                            if let Some(provider) = model.get("provider").and_then(|p| p.as_str()) {
+                                match provider {
+                                    "anthropic" | "claude" => {
+                                        continue_tier = UserTier::Enterprise;
+                                        continue_provider = "Anthropic".to_string();
+                                    }
+                                    "openai" => {
+                                        continue_tier = UserTier::PersonalFree;
+                                        continue_provider = "OpenAI".to_string();
+                                    }
+                                    other => {
+                                        continue_tier = UserTier::PersonalFree;
+                                        continue_provider = other.to_string();
+                                    }
+                                }
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        let continue_limit = effective_limit(&config.continue_quota, AgentId::Continue, continue_tier);
         let continue_used = if continue_installed { 45 } else { 0 };
         let continue_rem = continue_limit.saturating_sub(continue_used);
-        let continue_model_usages = vec![
-            ModelUsage {
-                name: "gpt-4o-mini".to_string(),
-                requests_used: (continue_used as f64 * 0.8) as u32,
-                limit: (continue_limit as f64 * 0.8) as u32,
-            },
-            ModelUsage {
-                name: "claude-3-5-sonnet".to_string(),
-                requests_used: (continue_used as f64 * 0.2) as u32,
-                limit: (continue_limit as f64 * 0.2) as u32,
-            },
-        ];
+        let continue_model_counts = ModelCounts {
+            gpt4o_mini: (continue_used as f64 * 0.8) as u32,
+            claude47: (continue_used as f64 * 0.2) as u32,
+            ..Default::default()
+        };
+        let continue_model_usages = build_model_usages(AgentId::Continue, continue_tier, continue_limit, &continue_model_counts, &continue_provider);
         agents.push(AgentState {
             id: AgentId::Continue,
             name: "Continue".to_string(),
@@ -1397,7 +1605,7 @@ impl AgentScanner {
             config_path: continue_config_str,
             is_authenticated: continue_installed,
             auth_info: if continue_installed {
-                "API Key / Local".to_string()
+                format!("{} / Local", continue_provider)
             } else {
                 "Not Configured".to_string()
             },
@@ -1434,23 +1642,41 @@ impl AgentScanner {
             None
         };
         let cody_installed = cody_exe.is_some();
-        let cody_tier = if cody_installed {
+        let mut cody_tier = if cody_installed {
             UserTier::LocalFree
         } else {
             UserTier::NotInstalled
         };
-        let cody_limit = if config.cody_quota.custom {
-            config.cody_quota.limit
-        } else {
-            400
-        };
+
+        if cody_installed {
+            // Detect Sourcegraph Enterprise tier
+            if std::env::var("SOURCEGRAPH_ACCESS_TOKEN").is_ok()
+                || std::env::var("SG_ACCESS_TOKEN").is_ok()
+            {
+                cody_tier = UserTier::Enterprise;
+            }
+
+            // Check Cody config for enterprise flag
+            let cody_config_file = home_path.join(".config/cody/config.json");
+            if cody_config_file.exists() {
+                if let Ok(content) = fs::read_to_string(&cody_config_file) {
+                    if let Ok(val) = serde_json::from_str::<serde_json::Value>(&content) {
+                        if val.get("enterprise").and_then(|e| e.as_bool()) == Some(true) {
+                            cody_tier = UserTier::Enterprise;
+                        }
+                    }
+                }
+            }
+        }
+
+        let cody_limit = effective_limit(&config.cody_quota, AgentId::Cody, cody_tier);
         let cody_used = if cody_installed { 32 } else { 0 };
         let cody_rem = cody_limit.saturating_sub(cody_used);
-        let cody_model_usages = vec![ModelUsage {
-            name: "claude-3-5-sonnet".to_string(),
-            requests_used: cody_used,
-            limit: cody_limit,
-        }];
+        let cody_model_counts = ModelCounts {
+            claude47: cody_used,
+            ..Default::default()
+        };
+        let cody_model_usages = build_model_usages(AgentId::Cody, cody_tier, cody_limit, &cody_model_counts, "");
         agents.push(AgentState {
             id: AgentId::Cody,
             name: "Cody".to_string(),
@@ -1459,7 +1685,10 @@ impl AgentScanner {
             config_path: cody_config_str,
             is_authenticated: cody_installed,
             auth_info: if cody_installed {
-                "Sourcegraph Cloud".to_string()
+                match cody_tier {
+                    UserTier::Enterprise => "Sourcegraph Enterprise".to_string(),
+                    _ => "Sourcegraph Cloud".to_string(),
+                }
             } else {
                 "Not Configured".to_string()
             },
@@ -1492,23 +1721,38 @@ impl AgentScanner {
             None
         };
         let supermaven_installed = supermaven_exe.is_some();
-        let supermaven_tier = if supermaven_installed {
+        let mut supermaven_tier = if supermaven_installed {
             UserTier::LocalFree
         } else {
             UserTier::NotInstalled
         };
-        let supermaven_limit = if config.supermaven_quota.custom {
-            config.supermaven_quota.limit
-        } else {
-            2000
-        };
+
+        if supermaven_installed {
+            // Detect Supermaven Pro tier
+            if std::env::var("SUPERMAVEN_API_KEY").is_ok() {
+                supermaven_tier = UserTier::Enterprise;
+            }
+
+            let sm_config_file = home_path.join(".supermaven/config.json");
+            if sm_config_file.exists() {
+                if let Ok(content) = fs::read_to_string(&sm_config_file) {
+                    if let Ok(val) = serde_json::from_str::<serde_json::Value>(&content) {
+                        if val.get("pro").and_then(|p| p.as_bool()) == Some(true) {
+                            supermaven_tier = UserTier::Enterprise;
+                        }
+                    }
+                }
+            }
+        }
+
+        let supermaven_limit = effective_limit(&config.supermaven_quota, AgentId::Supermaven, supermaven_tier);
         let supermaven_used = if supermaven_installed { 450 } else { 0 };
         let supermaven_rem = supermaven_limit.saturating_sub(supermaven_used);
-        let supermaven_model_usages = vec![ModelUsage {
-            name: "supermaven-model".to_string(),
-            requests_used: supermaven_used,
-            limit: supermaven_limit,
-        }];
+        let supermaven_model_counts = ModelCounts {
+            gpt5: supermaven_used,
+            ..Default::default()
+        };
+        let supermaven_model_usages = build_model_usages(AgentId::Supermaven, supermaven_tier, supermaven_limit, &supermaven_model_counts, "");
         agents.push(AgentState {
             id: AgentId::Supermaven,
             name: "Supermaven".to_string(),
@@ -1517,7 +1761,10 @@ impl AgentScanner {
             config_path: supermaven_config_str,
             is_authenticated: supermaven_installed,
             auth_info: if supermaven_installed {
-                "Supermaven Free".to_string()
+                match supermaven_tier {
+                    UserTier::Enterprise => "Supermaven Pro".to_string(),
+                    _ => "Supermaven Free".to_string(),
+                }
             } else {
                 "Not Configured".to_string()
             },
@@ -1774,5 +2021,103 @@ mod tests {
             result,
             Some((UserTier::OAuthEnterprise, "user@example.com".to_string()))
         );
+    }
+
+    #[test]
+    fn test_default_tier_limit_codex() {
+        assert_eq!(default_tier_limit(AgentId::Codex, UserTier::OAuthEnterprise), 2000);
+        assert_eq!(default_tier_limit(AgentId::Codex, UserTier::OAuthPersonal), 200);
+        assert_eq!(default_tier_limit(AgentId::Codex, UserTier::LocalFree), 50);
+        assert_eq!(default_tier_limit(AgentId::Codex, UserTier::Guest), 0);
+    }
+
+    #[test]
+    fn test_default_tier_limit_opencode() {
+        assert_eq!(default_tier_limit(AgentId::OpenCode, UserTier::Enterprise), 2000);
+        assert_eq!(default_tier_limit(AgentId::OpenCode, UserTier::PersonalFree), 1000);
+        assert_eq!(default_tier_limit(AgentId::OpenCode, UserTier::Guest), 200);
+    }
+
+    #[test]
+    fn test_default_tier_limit_agy() {
+        assert_eq!(default_tier_limit(AgentId::Agy, UserTier::AdvancedCli), 500);
+        assert_eq!(default_tier_limit(AgentId::Agy, UserTier::PersonalFree), 200);
+        assert_eq!(default_tier_limit(AgentId::Agy, UserTier::LocalFree), 0);
+    }
+
+    #[test]
+    fn test_default_tier_limit_all_agents() {
+        // Verify every agent returns a non-zero limit for at least one tier
+        let agents = [
+            AgentId::Codex, AgentId::OpenCode, AgentId::Agy, AgentId::Zed,
+            AgentId::Aider, AgentId::Ollama, AgentId::Continue, AgentId::Cody,
+            AgentId::Supermaven,
+        ];
+        for agent in agents {
+            let has_limit = default_tier_limit(agent, UserTier::Enterprise) > 0
+                || default_tier_limit(agent, UserTier::PersonalFree) > 0
+                || default_tier_limit(agent, UserTier::LocalFree) > 0
+                || default_tier_limit(agent, UserTier::OAuthEnterprise) > 0
+                || default_tier_limit(agent, UserTier::OAuthPersonal) > 0
+                || default_tier_limit(agent, UserTier::AdvancedCli) > 0
+                || default_tier_limit(agent, UserTier::Guest) > 0;
+            assert!(has_limit, "Agent {:?} has no tier with a non-zero limit", agent);
+        }
+    }
+
+    #[test]
+    fn test_effective_limit_custom_override() {
+        let settings = crate::config::AgentQuotaSettings { limit: 999, custom: true };
+        assert_eq!(effective_limit(&settings, AgentId::Codex, UserTier::LocalFree), 999);
+    }
+
+    #[test]
+    fn test_effective_limit_tier_default() {
+        let settings = crate::config::AgentQuotaSettings { limit: 999, custom: false };
+        assert_eq!(effective_limit(&settings, AgentId::Codex, UserTier::OAuthEnterprise), 2000);
+    }
+
+    #[test]
+    fn test_build_model_usages_codex() {
+        let counts = ModelCounts { gpt5: 10, gpt41: 20, claude47: 30, ..Default::default() };
+        let usages = build_model_usages(AgentId::Codex, UserTier::OAuthEnterprise, 2000, &counts, "");
+        assert_eq!(usages.len(), 3);
+        assert_eq!(usages[0].name, "gpt-5");
+        assert_eq!(usages[0].requests_used, 10);
+        assert_eq!(usages[0].limit, 500); // 0.25 * 2000
+        assert_eq!(usages[1].name, "gpt-4.1");
+        assert_eq!(usages[1].limit, 1000); // 0.50 * 2000
+        assert_eq!(usages[2].name, "claude-4.7");
+        assert_eq!(usages[2].limit, 1500); // 0.75 * 2000
+    }
+
+    #[test]
+    fn test_build_model_usages_agy() {
+        let counts = ModelCounts { gemini_flash: 70, gemini_pro: 30, ..Default::default() };
+        let usages = build_model_usages(AgentId::Agy, UserTier::AdvancedCli, 500, &counts, "");
+        assert_eq!(usages.len(), 2);
+        assert_eq!(usages[0].name, "Gemini 3.5 Flash");
+        assert_eq!(usages[0].requests_used, 70);
+        assert_eq!(usages[0].limit, 350); // 0.70 * 500
+        assert_eq!(usages[1].name, "Gemini 3.1 Pro");
+        assert_eq!(usages[1].limit, 150); // 0.30 * 500
+    }
+
+    #[test]
+    fn test_build_model_usages_agy_free_tier() {
+        let counts = ModelCounts { gemini_flash: 80, gemini_pro: 20, ..Default::default() };
+        let usages = build_model_usages(AgentId::Agy, UserTier::PersonalFree, 200, &counts, "");
+        assert_eq!(usages[0].limit, 160); // 0.80 * 200
+        assert_eq!(usages[1].limit, 40);  // 0.20 * 200
+    }
+
+    #[test]
+    fn test_build_model_usages_opencode_copilot() {
+        let counts = ModelCounts { gpt5: 5, gpt41: 10, claude47: 15, ..Default::default() };
+        let usages = build_model_usages(AgentId::OpenCode, UserTier::Enterprise, 2000, &counts, "GitHub Copilot");
+        assert_eq!(usages.len(), 3);
+        assert_eq!(usages[0].limit, 500);  // 0.25 * 2000
+        assert_eq!(usages[1].limit, 1000); // 0.50 * 2000
+        assert_eq!(usages[2].limit, 1500); // 0.75 * 2000
     }
 }
