@@ -462,7 +462,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                         }
 
                         // Select Agent list or settings list
-                        KeyCode::Up => {
+                        KeyCode::Up | KeyCode::Char('k') => {
                             if app.active_tab == 1 || app.active_tab == 3 {
                                 if app.selected_agent_idx > 0 {
                                     app.selected_agent_idx -= 1;
@@ -477,7 +477,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                                 }
                             }
                         }
-                        KeyCode::Down => {
+                        KeyCode::Down | KeyCode::Char('j') => {
                             if app.active_tab == 1 || app.active_tab == 3 {
                                 app.selected_agent_idx =
                                     (app.selected_agent_idx + 1) % app.agents.len();
