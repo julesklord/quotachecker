@@ -1584,66 +1584,30 @@ mod tests {
     }
 
     #[test]
-    fn test_get_version_fallback_codex() {
-        let script = "#!/bin/sh\nexit 1\n";
-        let path = create_mock_executable("mock_codex_app", script);
-        let version = AgentScanner::get_version(path.to_str().unwrap());
-        assert_eq!(version, Some("v1.2.0".to_string()));
-        let _ = fs::remove_file(path);
-    }
+    fn test_get_version_fallback() {
+        let test_cases = vec![
+            ("mock_codex_app", "v1.2.0"),
+            ("mock_zeditor_app", "v2.1.0"),
+            ("mock_aider_app", "v0.35.0"),
+            ("mock_ollama_app", "v0.1.48"),
+            ("mock_continue_app", "v0.8.45"),
+            ("mock_cody_app", "v1.18.0"),
+            ("mock_supermaven_app", "v0.1.2"),
+        ];
 
-    #[test]
-    fn test_get_version_fallback_zeditor() {
         let script = "#!/bin/sh\nexit 1\n";
-        let path = create_mock_executable("mock_zeditor_app", script);
-        let version = AgentScanner::get_version(path.to_str().unwrap());
-        assert_eq!(version, Some("v2.1.0".to_string()));
-        let _ = fs::remove_file(path);
-    }
 
-    #[test]
-    fn test_get_version_fallback_aider() {
-        let script = "#!/bin/sh\nexit 1\n";
-        let path = create_mock_executable("mock_aider_app", script);
-        let version = AgentScanner::get_version(path.to_str().unwrap());
-        assert_eq!(version, Some("v0.35.0".to_string()));
-        let _ = fs::remove_file(path);
-    }
-
-    #[test]
-    fn test_get_version_fallback_ollama() {
-        let script = "#!/bin/sh\nexit 1\n";
-        let path = create_mock_executable("mock_ollama_app", script);
-        let version = AgentScanner::get_version(path.to_str().unwrap());
-        assert_eq!(version, Some("v0.1.48".to_string()));
-        let _ = fs::remove_file(path);
-    }
-
-    #[test]
-    fn test_get_version_fallback_continue() {
-        let script = "#!/bin/sh\nexit 1\n";
-        let path = create_mock_executable("mock_continue_app", script);
-        let version = AgentScanner::get_version(path.to_str().unwrap());
-        assert_eq!(version, Some("v0.8.45".to_string()));
-        let _ = fs::remove_file(path);
-    }
-
-    #[test]
-    fn test_get_version_fallback_cody() {
-        let script = "#!/bin/sh\nexit 1\n";
-        let path = create_mock_executable("mock_cody_app", script);
-        let version = AgentScanner::get_version(path.to_str().unwrap());
-        assert_eq!(version, Some("v1.18.0".to_string()));
-        let _ = fs::remove_file(path);
-    }
-
-    #[test]
-    fn test_get_version_fallback_supermaven() {
-        let script = "#!/bin/sh\nexit 1\n";
-        let path = create_mock_executable("mock_supermaven_app", script);
-        let version = AgentScanner::get_version(path.to_str().unwrap());
-        assert_eq!(version, Some("v0.1.2".to_string()));
-        let _ = fs::remove_file(path);
+        for (app_name, expected_version) in test_cases {
+            let path = create_mock_executable(app_name, script);
+            let version = AgentScanner::get_version(path.to_str().unwrap());
+            assert_eq!(
+                version,
+                Some(expected_version.to_string()),
+                "Failed for app: {}",
+                app_name
+            );
+            let _ = fs::remove_file(path);
+        }
     }
 
     #[test]
