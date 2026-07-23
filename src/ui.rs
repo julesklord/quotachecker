@@ -1697,7 +1697,7 @@ fn draw_footer(f: &mut Frame, area: Rect, ctx: &RenderContext) {
         footer_spans.extend(kpill("Enter", "Save", color_primary));
         footer_spans.extend(kpill("Esc", "Cancel", COLOR_DIM));
     } else {
-        footer_spans.extend(kpill("q", "Quit", COLOR_DANGER));
+        footer_spans.extend(kpill("q/Esc", "Quit", COLOR_DANGER));
         footer_spans.extend(kpill("Tab/←→", "Switch tab", COLOR_DIM));
         footer_spans.extend(kpill("r", "Force refresh", color_primary));
 
@@ -1717,7 +1717,7 @@ fn draw_footer(f: &mut Frame, area: Rect, ctx: &RenderContext) {
                 if ctx.selected_setting_idx == 4 {
                     footer_spans.extend(kpill("Enter/e", "Open editor", color_primary));
                 } else {
-                    footer_spans.extend(kpill("Enter/+/-", "Cycle value", color_primary));
+                    footer_spans.extend(kpill("Enter/+/-/h/l", "Cycle value", color_primary));
                     footer_spans.extend(kpill("e", "Open editor", COLOR_DIM));
                 }
             }
