@@ -64,3 +64,6 @@
 ## 2024-07-22 - Explicit Keybind Alternatives for Value Cycling and Quitting
 **Learning:** The application had several undocumented keybindings (`Esc` for quitting, `h`/`l` for cycling setting values) that were functional in the backend but invisible to the user. This creates a disconnect where power users or Vim users might try them, but regular users would be unaware they exist, reducing discoverability.
 **Action:** When keybindings have alternative options (like `+`/`-` vs `h`/`l` or `q` vs `Esc`), explicitly advertise them in the UI footer using combined string formats like `"Enter/+/-/h/l"` or `"q/Esc"` to ensure all users can discover the full range of supported inputs without guessing.
+## 2024-07-23 - Provide Vim-style navigation alternatives
+**Learning:** In TUI applications, providing standard arrow key navigation (`↑↓`) is good, but omitting Vim-style alternatives (`j`/`k`) alienates power users who prefer to keep their hands on the home row.
+**Action:** Always map `j` and `k` to down/up actions in list views and explicitly advertise them in UI hints (e.g., `↑↓/k/j`) alongside standard arrow keys to improve accessibility and discoverability.

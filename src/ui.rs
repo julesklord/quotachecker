@@ -1171,7 +1171,7 @@ fn draw_agents_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
     }
 
     hint_spans.push(Span::styled(
-        " ↑↓ ",
+        " ↑↓/k/j ",
         Style::default().fg(Color::Black).bg(COLOR_DIM).bold(),
     ));
     hint_spans.push(Span::styled(
@@ -1458,7 +1458,7 @@ fn draw_quotas_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
                 ),
                 Span::styled("  Change screen   ", Style::default().fg(COLOR_MUTED)),
                 Span::styled(
-                    " ↑↓ ",
+                    " ↑↓/k/j ",
                     Style::default().fg(Color::Black).bg(COLOR_DIM).bold(),
                 ),
                 Span::styled("  Select agent   ", Style::default().fg(COLOR_MUTED)),
@@ -1630,7 +1630,7 @@ fn draw_settings_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
             let mut spans = vec![
                 Span::styled("  ", Style::default()),
                 Span::styled(
-                    " ↑↓ ",
+                    " ↑↓/k/j ",
                     Style::default().fg(Color::Black).bg(COLOR_DIM).bold(),
                 ),
                 Span::styled("  Select   ", Style::default().fg(COLOR_MUTED)),
@@ -1704,7 +1704,7 @@ fn draw_footer(f: &mut Frame, area: Rect, ctx: &RenderContext) {
         // Tab-specific
         match ctx.active_tab {
             1 | 3 => {
-                footer_spans.extend(kpill("↑↓", "Select agent", COLOR_DIM));
+                footer_spans.extend(kpill("↑↓/k/j", "Select agent", COLOR_DIM));
                 if ctx.agents[ctx.selected_agent_idx].executable_path.is_some()
                     && ctx.agents[ctx.selected_agent_idx].quota_type
                         != crate::agent::QuotaType::Unlimited
@@ -1713,7 +1713,7 @@ fn draw_footer(f: &mut Frame, area: Rect, ctx: &RenderContext) {
                 }
             }
             4 => {
-                footer_spans.extend(kpill("↑↓", "Select", COLOR_DIM));
+                footer_spans.extend(kpill("↑↓/k/j", "Select", COLOR_DIM));
                 if ctx.selected_setting_idx == 4 {
                     footer_spans.extend(kpill("Enter/e", "Open editor", color_primary));
                 } else {
