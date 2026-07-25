@@ -1698,7 +1698,7 @@ fn draw_footer(f: &mut Frame, area: Rect, ctx: &RenderContext) {
         footer_spans.extend(kpill("Esc", "Cancel", COLOR_DIM));
     } else {
         footer_spans.extend(kpill("q/Esc", "Quit", COLOR_DANGER));
-        footer_spans.extend(kpill("Tab/←→", "Switch tab", COLOR_DIM));
+        footer_spans.extend(kpill("Tab/Shift+Tab/←→", "Switch tab", COLOR_DIM));
         footer_spans.extend(kpill("r", "Force refresh", color_primary));
 
         // Tab-specific

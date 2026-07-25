@@ -436,6 +436,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                         KeyCode::Tab => {
                             app.active_tab = (app.active_tab + 1) % 5;
                         }
+                        KeyCode::BackTab => {
+                            if app.active_tab > 0 {
+                                app.active_tab -= 1;
+                            } else {
+                                app.active_tab = 4;
+                            }
+                        }
                         KeyCode::Char('1') => app.active_tab = 0,
                         KeyCode::Char('2') => app.active_tab = 1,
                         KeyCode::Char('3') => app.active_tab = 2,
