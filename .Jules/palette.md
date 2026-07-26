@@ -70,3 +70,6 @@
 ## 2024-07-25 - Support Shift-Tab for backwards navigation
 **Learning:** In TUI applications, users expect standard browser-like bidirectional navigation using Tab and Shift-Tab. Missing Shift-Tab support breaks user flow and decreases accessibility, as users must cycle through all tabs forward to go back one step.
 **Action:** Always implement `KeyCode::BackTab` alongside `KeyCode::Tab` for bidirectional list/tab navigation, and ensure UI hints (like `Tab/Shift+Tab`) advertise this capability.
+## 2024-07-28 - Inline validation for lower bounds
+**Learning:** When users edit numeric limits (like quotas), allowing them to set limits below their current usage without a clear warning can cause accidental immediate lockouts or confusion.
+**Action:** Add inline validation warnings when a new proposed limit is below the currently consumed quota amount.

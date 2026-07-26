@@ -1860,6 +1860,20 @@ fn draw_budget_modal(f: &mut Frame, area: Rect, ctx: &RenderContext) {
             Style::default().fg(COLOR_DANGER).italic(),
         )));
         f.render_widget(warning_p, form_layout[3]);
+    } else if let Ok(new_limit) = display_val.parse::<u32>() {
+        if new_limit < active_agent.quota_used {
+            let warning_p = Paragraph::new(Line::from(Span::styled(
+                " ⚠ Limit is below current usage",
+                Style::default().fg(COLOR_WARN).italic(),
+            )));
+            f.render_widget(warning_p, form_layout[3]);
+        } else {
+            let success_p = Paragraph::new(Line::from(Span::styled(
+                " ✔ Valid limit",
+                Style::default().fg(COLOR_SUCCESS).italic(),
+            )));
+            f.render_widget(success_p, form_layout[3]);
+        }
     }
 }
 
