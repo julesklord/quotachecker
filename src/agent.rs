@@ -584,7 +584,11 @@ impl AgentScanner {
         }
 
         // Try common search paths as a bulletproof fallback
-        let home = std::env::var("HOME").unwrap_or_else(|_| "/home/julesklord".to_string());
+        let home = if let Some(base_dirs) = directories::BaseDirs::new() {
+            base_dirs.home_dir().to_string_lossy().to_string()
+        } else {
+            std::env::var("HOME").unwrap_or_else(|_| "~".to_string())
+        };
 
         let path = format!("/usr/bin/{}", cmd);
         if Path::new(&path).exists() {
@@ -665,7 +669,7 @@ impl AgentScanner {
         let home_path = if let Some(base_dirs) = directories::BaseDirs::new() {
             base_dirs.home_dir().to_path_buf()
         } else {
-            let home = std::env::var("HOME").unwrap_or_else(|_| "/home/julesklord".to_string());
+            let home = std::env::var("HOME").unwrap_or_else(|_| "~".to_string());
             std::path::PathBuf::from(home)
         };
 
