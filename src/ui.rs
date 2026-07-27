@@ -1453,7 +1453,7 @@ fn draw_quotas_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
             let mut spans = vec![
                 Span::styled("  ", Style::default()),
                 Span::styled(
-                    " Tab/←→ ",
+                    " Tab/Shift+Tab/←→ ",
                     Style::default().fg(Color::Black).bg(COLOR_DIM).bold(),
                 ),
                 Span::styled("  Change screen   ", Style::default().fg(COLOR_MUTED)),
@@ -1479,7 +1479,7 @@ fn draw_quotas_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
             }
 
             spans.push(Span::styled(
-                " q ",
+                " q / Esc ",
                 Style::default().fg(Color::Black).bg(COLOR_DANGER).bold(),
             ));
             spans.push(Span::styled("  Quit", Style::default().fg(COLOR_MUTED)));
@@ -1647,11 +1647,19 @@ fn draw_settings_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
                 ));
             } else {
                 spans.push(Span::styled(
-                    " Enter / +/- ",
+                    " Enter / +/- / h / l ",
                     Style::default().fg(Color::Black).bg(COLOR_DIM).bold(),
                 ));
                 spans.push(Span::styled(
-                    "  Cycle value",
+                    "  Cycle value   ",
+                    Style::default().fg(COLOR_MUTED),
+                ));
+                spans.push(Span::styled(
+                    " e ",
+                    Style::default().fg(Color::Black).bg(COLOR_DIM).bold(),
+                ));
+                spans.push(Span::styled(
+                    "  Open editor",
                     Style::default().fg(COLOR_MUTED),
                 ));
             }
@@ -1789,10 +1797,15 @@ fn draw_budget_modal(f: &mut Frame, area: Rect, ctx: &RenderContext) {
 
     // Hint line
     let hint = Paragraph::new(Line::from(vec![
-        Span::styled(" Current: ", Style::default().fg(COLOR_MUTED)),
+        Span::styled(" Limit: ", Style::default().fg(COLOR_MUTED)),
         Span::styled(
-            format!("{} requests", active_agent.quota_limit),
+            format!("{}", active_agent.quota_limit),
             Style::default().fg(color_primary).bold(),
+        ),
+        Span::styled("  │  Used: ", Style::default().fg(COLOR_MUTED)),
+        Span::styled(
+            format!("{}", active_agent.quota_used),
+            Style::default().fg(COLOR_WARN).bold(),
         ),
         Span::styled(
             "  →  Enter new limit:",

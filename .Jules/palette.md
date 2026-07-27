@@ -73,3 +73,7 @@
 ## 2024-07-28 - Inline validation for lower bounds
 **Learning:** When users edit numeric limits (like quotas), allowing them to set limits below their current usage without a clear warning can cause accidental immediate lockouts or confusion.
 **Action:** Add inline validation warnings when a new proposed limit is below the currently consumed quota amount.
+
+## 2024-07-29 - Provide contextual data in modals to prevent memory reliance
+**Learning:** When users edit a limit or quota in a modal, only validating the new input against the current usage (e.g. showing "Limit is below current usage") without actually displaying the current usage amount in the modal itself forces the user to rely on memory. This breaks their flow as they might have to close the modal to check their usage before trying again.
+**Action:** Always provide necessary contextual data (like current usage) directly within the modal or form so users can make informed decisions without navigating away.
