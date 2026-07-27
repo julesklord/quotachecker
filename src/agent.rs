@@ -290,9 +290,21 @@ pub(crate) fn build_model_usages(
                 _ => (0, 0, 0),
             };
             vec![
-                ModelUsage { name: "gpt-5".into(), requests_used: counts.gpt5, limit: lg5 },
-                ModelUsage { name: "gpt-4.1".into(), requests_used: counts.gpt41, limit: lg41 },
-                ModelUsage { name: "claude-4.7".into(), requests_used: counts.claude47, limit: lc47 },
+                ModelUsage {
+                    name: "gpt-5".into(),
+                    requests_used: counts.gpt5,
+                    limit: lg5,
+                },
+                ModelUsage {
+                    name: "gpt-4.1".into(),
+                    requests_used: counts.gpt41,
+                    limit: lg41,
+                },
+                ModelUsage {
+                    name: "claude-4.7".into(),
+                    requests_used: counts.claude47,
+                    limit: lc47,
+                },
             ]
         }
         AgentId::OpenCode => match provider {
@@ -311,30 +323,45 @@ pub(crate) fn build_model_usages(
                     _ => (0, 0, 0),
                 };
                 vec![
-                    ModelUsage { name: "gpt-5".into(), requests_used: counts.gpt5, limit: lg5 },
-                    ModelUsage { name: "gpt-4.1".into(), requests_used: counts.gpt41, limit: lg41 },
-                    ModelUsage { name: "claude-4.7".into(), requests_used: counts.claude47, limit: lc47 },
+                    ModelUsage {
+                        name: "gpt-5".into(),
+                        requests_used: counts.gpt5,
+                        limit: lg5,
+                    },
+                    ModelUsage {
+                        name: "gpt-4.1".into(),
+                        requests_used: counts.gpt41,
+                        limit: lg41,
+                    },
+                    ModelUsage {
+                        name: "claude-4.7".into(),
+                        requests_used: counts.claude47,
+                        limit: lc47,
+                    },
                 ]
             }
             "OpenAI" => {
                 let (lg4o, lg4om) = match tier {
-                    UserTier::Enterprise => (
-                        (limit as f64 * 0.25) as u32,
-                        (limit as f64 * 1.0) as u32,
-                    ),
-                    UserTier::PersonalFree => (
-                        (limit as f64 * 0.05) as u32,
-                        (limit as f64 * 0.20) as u32,
-                    ),
-                    UserTier::Guest => (
-                        (limit as f64 * 0.05) as u32,
-                        (limit as f64 * 0.25) as u32,
-                    ),
+                    UserTier::Enterprise => {
+                        ((limit as f64 * 0.25) as u32, (limit as f64 * 1.0) as u32)
+                    }
+                    UserTier::PersonalFree => {
+                        ((limit as f64 * 0.05) as u32, (limit as f64 * 0.20) as u32)
+                    }
+                    UserTier::Guest => ((limit as f64 * 0.05) as u32, (limit as f64 * 0.25) as u32),
                     _ => (0, 0),
                 };
                 vec![
-                    ModelUsage { name: "gpt-4o".into(), requests_used: counts.gpt4o, limit: lg4o },
-                    ModelUsage { name: "gpt-4o-mini".into(), requests_used: counts.gpt4o_mini, limit: lg4om },
+                    ModelUsage {
+                        name: "gpt-4o".into(),
+                        requests_used: counts.gpt4o,
+                        limit: lg4o,
+                    },
+                    ModelUsage {
+                        name: "gpt-4o-mini".into(),
+                        requests_used: counts.gpt4o_mini,
+                        limit: lg4om,
+                    },
                 ]
             }
             "Anthropic Claude" => {
@@ -344,43 +371,63 @@ pub(crate) fn build_model_usages(
                     _ => 0,
                 };
                 vec![
-                    ModelUsage { name: "claude-4.7".into(), requests_used: counts.gpt4o, limit: lc },
-                    ModelUsage { name: "claude-4.7".into(), requests_used: counts.gpt4o_mini, limit: lc },
+                    ModelUsage {
+                        name: "claude-4.7".into(),
+                        requests_used: counts.gpt4o,
+                        limit: lc,
+                    },
+                    ModelUsage {
+                        name: "claude-4.7".into(),
+                        requests_used: counts.gpt4o_mini,
+                        limit: lc,
+                    },
                 ]
             }
             _ => {
                 let (lds, ldr) = match tier {
-                    UserTier::Enterprise => (
-                        (limit as f64 * 0.75) as u32,
-                        (limit as f64 * 0.25) as u32,
-                    ),
-                    UserTier::PersonalFree | UserTier::Guest => (
-                        (limit as f64 * 0.15) as u32,
-                        (limit as f64 * 0.05) as u32,
-                    ),
+                    UserTier::Enterprise => {
+                        ((limit as f64 * 0.75) as u32, (limit as f64 * 0.25) as u32)
+                    }
+                    UserTier::PersonalFree | UserTier::Guest => {
+                        ((limit as f64 * 0.15) as u32, (limit as f64 * 0.05) as u32)
+                    }
                     _ => (0, 0),
                 };
                 vec![
-                    ModelUsage { name: "deepseek-chat".into(), requests_used: counts.deepseek_chat, limit: lds },
-                    ModelUsage { name: "deepseek-reasoner".into(), requests_used: counts.deepseek_reasoner, limit: ldr },
+                    ModelUsage {
+                        name: "deepseek-chat".into(),
+                        requests_used: counts.deepseek_chat,
+                        limit: lds,
+                    },
+                    ModelUsage {
+                        name: "deepseek-reasoner".into(),
+                        requests_used: counts.deepseek_reasoner,
+                        limit: ldr,
+                    },
                 ]
             }
         },
         AgentId::Agy => {
             let (lf, lp) = match tier {
-                UserTier::AdvancedCli => (
-                    (limit as f64 * 0.70) as u32,
-                    (limit as f64 * 0.30) as u32,
-                ),
-                UserTier::PersonalFree => (
-                    (limit as f64 * 0.80) as u32,
-                    (limit as f64 * 0.20) as u32,
-                ),
+                UserTier::AdvancedCli => {
+                    ((limit as f64 * 0.70) as u32, (limit as f64 * 0.30) as u32)
+                }
+                UserTier::PersonalFree => {
+                    ((limit as f64 * 0.80) as u32, (limit as f64 * 0.20) as u32)
+                }
                 _ => (0, 0),
             };
             vec![
-                ModelUsage { name: "Gemini 3.5 Flash".into(), requests_used: counts.gemini_flash, limit: lf },
-                ModelUsage { name: "Gemini 3.1 Pro".into(), requests_used: counts.gemini_pro, limit: lp },
+                ModelUsage {
+                    name: "Gemini 3.5 Flash".into(),
+                    requests_used: counts.gemini_flash,
+                    limit: lf,
+                },
+                ModelUsage {
+                    name: "Gemini 3.1 Pro".into(),
+                    requests_used: counts.gemini_pro,
+                    limit: lp,
+                },
             ]
         }
         AgentId::Zed => {
@@ -390,57 +437,79 @@ pub(crate) fn build_model_usages(
                 UserTier::PersonalFree => (limit as f64 * 0.30) as u32,
                 _ => 0,
             };
-            vec![
-                ModelUsage { name: "claude-4.7".into(), requests_used: counts.claude47, limit: lc },
-            ]
+            vec![ModelUsage {
+                name: "claude-4.7".into(),
+                requests_used: counts.claude47,
+                limit: lc,
+            }]
         }
         AgentId::Aider => {
             let (la, lg) = match tier {
-                UserTier::Enterprise => (
-                    (limit as f64 * 0.60) as u32,
-                    (limit as f64 * 0.40) as u32,
-                ),
-                _ => (
-                    (limit as f64 * 0.60) as u32,
-                    (limit as f64 * 0.40) as u32,
-                ),
+                UserTier::Enterprise => {
+                    ((limit as f64 * 0.60) as u32, (limit as f64 * 0.40) as u32)
+                }
+                _ => ((limit as f64 * 0.60) as u32, (limit as f64 * 0.40) as u32),
             };
             vec![
-                ModelUsage { name: "claude-3-5-sonnet".into(), requests_used: counts.claude47, limit: la },
-                ModelUsage { name: "gpt-4o".into(), requests_used: counts.gpt4o, limit: lg },
+                ModelUsage {
+                    name: "claude-3-5-sonnet".into(),
+                    requests_used: counts.claude47,
+                    limit: la,
+                },
+                ModelUsage {
+                    name: "gpt-4o".into(),
+                    requests_used: counts.gpt4o,
+                    limit: lg,
+                },
             ]
         }
         AgentId::Ollama => {
             vec![
-                ModelUsage { name: "llama3".into(), requests_used: counts.llama3, limit: (limit as f64 * 0.7) as u32 },
-                ModelUsage { name: "mistral".into(), requests_used: counts.mistral, limit: (limit as f64 * 0.3) as u32 },
+                ModelUsage {
+                    name: "llama3".into(),
+                    requests_used: counts.llama3,
+                    limit: (limit as f64 * 0.7) as u32,
+                },
+                ModelUsage {
+                    name: "mistral".into(),
+                    requests_used: counts.mistral,
+                    limit: (limit as f64 * 0.3) as u32,
+                },
             ]
         }
         AgentId::Continue => {
             let (lg, lc) = match tier {
-                UserTier::Enterprise => (
-                    (limit as f64 * 0.50) as u32,
-                    (limit as f64 * 0.50) as u32,
-                ),
-                _ => (
-                    (limit as f64 * 0.80) as u32,
-                    (limit as f64 * 0.20) as u32,
-                ),
+                UserTier::Enterprise => {
+                    ((limit as f64 * 0.50) as u32, (limit as f64 * 0.50) as u32)
+                }
+                _ => ((limit as f64 * 0.80) as u32, (limit as f64 * 0.20) as u32),
             };
             vec![
-                ModelUsage { name: "gpt-4o-mini".into(), requests_used: counts.gpt4o_mini, limit: lg },
-                ModelUsage { name: "claude-3-5-sonnet".into(), requests_used: counts.claude47, limit: lc },
+                ModelUsage {
+                    name: "gpt-4o-mini".into(),
+                    requests_used: counts.gpt4o_mini,
+                    limit: lg,
+                },
+                ModelUsage {
+                    name: "claude-3-5-sonnet".into(),
+                    requests_used: counts.claude47,
+                    limit: lc,
+                },
             ]
         }
         AgentId::Cody => {
-            vec![
-                ModelUsage { name: "claude-3-5-sonnet".into(), requests_used: counts.claude47, limit },
-            ]
+            vec![ModelUsage {
+                name: "claude-3-5-sonnet".into(),
+                requests_used: counts.claude47,
+                limit,
+            }]
         }
         AgentId::Supermaven => {
-            vec![
-                ModelUsage { name: "supermaven-model".into(), requests_used: counts.gpt5, limit },
-            ]
+            vec![ModelUsage {
+                name: "supermaven-model".into(),
+                requests_used: counts.gpt5,
+                limit,
+            }]
         }
     }
 }
@@ -772,7 +841,13 @@ impl AgentScanner {
             claude47: claude4_count,
             ..Default::default()
         };
-        let codex_model_usages = build_model_usages(AgentId::Codex, codex_tier, codex_limit, &codex_model_counts, "");
+        let codex_model_usages = build_model_usages(
+            AgentId::Codex,
+            codex_tier,
+            codex_limit,
+            &codex_model_counts,
+            "",
+        );
 
         let codex_used = codex_requests;
         let codex_rem = codex_limit.saturating_sub(codex_used);
@@ -1074,7 +1149,8 @@ impl AgentScanner {
             ds_reasoner_count = opencode_requests - ds_coder_count;
         }
 
-        let opencode_limit = effective_limit(&config.opencode_quota, AgentId::OpenCode, opencode_tier);
+        let opencode_limit =
+            effective_limit(&config.opencode_quota, AgentId::OpenCode, opencode_tier);
 
         let mut opencode_model_usages = Vec::new();
         if opencode_provider == "GitHub Copilot" {
@@ -1234,8 +1310,8 @@ impl AgentScanner {
             agy_auth_info = "Ready".to_string();
 
             // Detect tier based on Google auth tokens
-            let has_google_auth = std::env::var("GOOGLE_API_KEY").is_ok()
-                || std::env::var("GEMINI_API_KEY").is_ok();
+            let has_google_auth =
+                std::env::var("GOOGLE_API_KEY").is_ok() || std::env::var("GEMINI_API_KEY").is_ok();
             let advanced_config = agy_config.join("settings.json");
             if !advanced_config.exists() && !has_google_auth {
                 agy_tier = UserTier::PersonalFree;
@@ -1298,7 +1374,8 @@ impl AgentScanner {
             gemini_pro: agy_pro_count,
             ..Default::default()
         };
-        let agy_model_usages = build_model_usages(AgentId::Agy, agy_tier, agy_limit, &agy_model_counts, "");
+        let agy_model_usages =
+            build_model_usages(AgentId::Agy, agy_tier, agy_limit, &agy_model_counts, "");
 
         let agy_used = agy_requests;
         let agy_rem = agy_limit.saturating_sub(agy_used);
@@ -1374,7 +1451,8 @@ impl AgentScanner {
             claude47: zed_requests,
             ..Default::default()
         };
-        let zed_model_usages = build_model_usages(AgentId::Zed, zed_tier, zed_limit, &zed_model_counts, "");
+        let zed_model_usages =
+            build_model_usages(AgentId::Zed, zed_tier, zed_limit, &zed_model_counts, "");
 
         let zed_used = zed_requests;
         let zed_rem = zed_limit.saturating_sub(zed_used);
@@ -1429,8 +1507,7 @@ impl AgentScanner {
 
         if aider_installed {
             // Detect provider from env vars
-            if std::env::var("ANTHROPIC_API_KEY").is_ok()
-                || std::env::var("CLAUDE_API_KEY").is_ok()
+            if std::env::var("ANTHROPIC_API_KEY").is_ok() || std::env::var("CLAUDE_API_KEY").is_ok()
             {
                 aider_tier = UserTier::Enterprise;
                 aider_provider = "Anthropic".to_string();
@@ -1462,7 +1539,13 @@ impl AgentScanner {
             gpt4o: (aider_used as f64 * 0.4) as u32,
             ..Default::default()
         };
-        let aider_model_usages = build_model_usages(AgentId::Aider, aider_tier, aider_limit, &aider_model_counts, &aider_provider);
+        let aider_model_usages = build_model_usages(
+            AgentId::Aider,
+            aider_tier,
+            aider_limit,
+            &aider_model_counts,
+            &aider_provider,
+        );
         agents.push(AgentState {
             id: AgentId::Aider,
             name: "Aider".to_string(),
@@ -1517,7 +1600,13 @@ impl AgentScanner {
             mistral: (ollama_used as f64 * 0.3) as u32,
             ..Default::default()
         };
-        let ollama_model_usages = build_model_usages(AgentId::Ollama, ollama_tier, ollama_limit, &ollama_model_counts, "");
+        let ollama_model_usages = build_model_usages(
+            AgentId::Ollama,
+            ollama_tier,
+            ollama_limit,
+            &ollama_model_counts,
+            "",
+        );
         agents.push(AgentState {
             id: AgentId::Ollama,
             name: "Ollama".to_string(),
@@ -1594,7 +1683,8 @@ impl AgentScanner {
             }
         }
 
-        let continue_limit = effective_limit(&config.continue_quota, AgentId::Continue, continue_tier);
+        let continue_limit =
+            effective_limit(&config.continue_quota, AgentId::Continue, continue_tier);
         let continue_used = if continue_installed { 45 } else { 0 };
         let continue_rem = continue_limit.saturating_sub(continue_used);
         let continue_model_counts = ModelCounts {
@@ -1602,7 +1692,13 @@ impl AgentScanner {
             claude47: (continue_used as f64 * 0.2) as u32,
             ..Default::default()
         };
-        let continue_model_usages = build_model_usages(AgentId::Continue, continue_tier, continue_limit, &continue_model_counts, &continue_provider);
+        let continue_model_usages = build_model_usages(
+            AgentId::Continue,
+            continue_tier,
+            continue_limit,
+            &continue_model_counts,
+            &continue_provider,
+        );
         agents.push(AgentState {
             id: AgentId::Continue,
             name: "Continue".to_string(),
@@ -1682,7 +1778,8 @@ impl AgentScanner {
             claude47: cody_used,
             ..Default::default()
         };
-        let cody_model_usages = build_model_usages(AgentId::Cody, cody_tier, cody_limit, &cody_model_counts, "");
+        let cody_model_usages =
+            build_model_usages(AgentId::Cody, cody_tier, cody_limit, &cody_model_counts, "");
         agents.push(AgentState {
             id: AgentId::Cody,
             name: "Cody".to_string(),
@@ -1751,14 +1848,24 @@ impl AgentScanner {
             }
         }
 
-        let supermaven_limit = effective_limit(&config.supermaven_quota, AgentId::Supermaven, supermaven_tier);
+        let supermaven_limit = effective_limit(
+            &config.supermaven_quota,
+            AgentId::Supermaven,
+            supermaven_tier,
+        );
         let supermaven_used = if supermaven_installed { 450 } else { 0 };
         let supermaven_rem = supermaven_limit.saturating_sub(supermaven_used);
         let supermaven_model_counts = ModelCounts {
             gpt5: supermaven_used,
             ..Default::default()
         };
-        let supermaven_model_usages = build_model_usages(AgentId::Supermaven, supermaven_tier, supermaven_limit, &supermaven_model_counts, "");
+        let supermaven_model_usages = build_model_usages(
+            AgentId::Supermaven,
+            supermaven_tier,
+            supermaven_limit,
+            &supermaven_model_counts,
+            "",
+        );
         agents.push(AgentState {
             id: AgentId::Supermaven,
             name: "Supermaven".to_string(),
@@ -1807,7 +1914,10 @@ mod tests {
         );
         let path = create_mock_executable("mock_git_success", &script);
         let result = get_git_identity_internal(path.to_str().unwrap());
-        assert_eq!(result, Some(("Test User".to_string(), "test@example.com".to_string())));
+        assert_eq!(
+            result,
+            Some(("Test User".to_string(), "test@example.com".to_string()))
+        );
         let _ = fs::remove_file(path);
     }
 
@@ -1825,10 +1935,7 @@ mod tests {
 
     #[test]
     fn test_get_git_identity_internal_failure() {
-        let script = format!(
-            "#!/bin/sh\ne{}it 1\n",
-            "x"
-        );
+        let script = format!("#!/bin/sh\ne{}it 1\n", "x");
         let path = create_mock_executable("mock_git_fail", &script);
         let result = get_git_identity_internal(path.to_str().unwrap());
         assert_eq!(result, None);
@@ -2043,23 +2150,38 @@ mod tests {
 
     #[test]
     fn test_default_tier_limit_codex() {
-        assert_eq!(default_tier_limit(AgentId::Codex, UserTier::OAuthEnterprise), 2000);
-        assert_eq!(default_tier_limit(AgentId::Codex, UserTier::OAuthPersonal), 200);
+        assert_eq!(
+            default_tier_limit(AgentId::Codex, UserTier::OAuthEnterprise),
+            2000
+        );
+        assert_eq!(
+            default_tier_limit(AgentId::Codex, UserTier::OAuthPersonal),
+            200
+        );
         assert_eq!(default_tier_limit(AgentId::Codex, UserTier::LocalFree), 50);
         assert_eq!(default_tier_limit(AgentId::Codex, UserTier::Guest), 0);
     }
 
     #[test]
     fn test_default_tier_limit_opencode() {
-        assert_eq!(default_tier_limit(AgentId::OpenCode, UserTier::Enterprise), 2000);
-        assert_eq!(default_tier_limit(AgentId::OpenCode, UserTier::PersonalFree), 1000);
+        assert_eq!(
+            default_tier_limit(AgentId::OpenCode, UserTier::Enterprise),
+            2000
+        );
+        assert_eq!(
+            default_tier_limit(AgentId::OpenCode, UserTier::PersonalFree),
+            1000
+        );
         assert_eq!(default_tier_limit(AgentId::OpenCode, UserTier::Guest), 200);
     }
 
     #[test]
     fn test_default_tier_limit_agy() {
         assert_eq!(default_tier_limit(AgentId::Agy, UserTier::AdvancedCli), 500);
-        assert_eq!(default_tier_limit(AgentId::Agy, UserTier::PersonalFree), 200);
+        assert_eq!(
+            default_tier_limit(AgentId::Agy, UserTier::PersonalFree),
+            200
+        );
         assert_eq!(default_tier_limit(AgentId::Agy, UserTier::LocalFree), 0);
     }
 
@@ -2067,8 +2189,14 @@ mod tests {
     fn test_default_tier_limit_all_agents() {
         // Verify every agent returns a non-zero limit for at least one tier
         let agents = [
-            AgentId::Codex, AgentId::OpenCode, AgentId::Agy, AgentId::Zed,
-            AgentId::Aider, AgentId::Ollama, AgentId::Continue, AgentId::Cody,
+            AgentId::Codex,
+            AgentId::OpenCode,
+            AgentId::Agy,
+            AgentId::Zed,
+            AgentId::Aider,
+            AgentId::Ollama,
+            AgentId::Continue,
+            AgentId::Cody,
             AgentId::Supermaven,
         ];
         for agent in agents {
@@ -2079,26 +2207,48 @@ mod tests {
                 || default_tier_limit(agent, UserTier::OAuthPersonal) > 0
                 || default_tier_limit(agent, UserTier::AdvancedCli) > 0
                 || default_tier_limit(agent, UserTier::Guest) > 0;
-            assert!(has_limit, "Agent {:?} has no tier with a non-zero limit", agent);
+            assert!(
+                has_limit,
+                "Agent {:?} has no tier with a non-zero limit",
+                agent
+            );
         }
     }
 
     #[test]
     fn test_effective_limit_custom_override() {
-        let settings = crate::config::AgentQuotaSettings { limit: 999, custom: true };
-        assert_eq!(effective_limit(&settings, AgentId::Codex, UserTier::LocalFree), 999);
+        let settings = crate::config::AgentQuotaSettings {
+            limit: 999,
+            custom: true,
+        };
+        assert_eq!(
+            effective_limit(&settings, AgentId::Codex, UserTier::LocalFree),
+            999
+        );
     }
 
     #[test]
     fn test_effective_limit_tier_default() {
-        let settings = crate::config::AgentQuotaSettings { limit: 999, custom: false };
-        assert_eq!(effective_limit(&settings, AgentId::Codex, UserTier::OAuthEnterprise), 2000);
+        let settings = crate::config::AgentQuotaSettings {
+            limit: 999,
+            custom: false,
+        };
+        assert_eq!(
+            effective_limit(&settings, AgentId::Codex, UserTier::OAuthEnterprise),
+            2000
+        );
     }
 
     #[test]
     fn test_build_model_usages_codex() {
-        let counts = ModelCounts { gpt5: 10, gpt41: 20, claude47: 30, ..Default::default() };
-        let usages = build_model_usages(AgentId::Codex, UserTier::OAuthEnterprise, 2000, &counts, "");
+        let counts = ModelCounts {
+            gpt5: 10,
+            gpt41: 20,
+            claude47: 30,
+            ..Default::default()
+        };
+        let usages =
+            build_model_usages(AgentId::Codex, UserTier::OAuthEnterprise, 2000, &counts, "");
         assert_eq!(usages.len(), 3);
         assert_eq!(usages[0].name, "gpt-5");
         assert_eq!(usages[0].requests_used, 10);
@@ -2111,7 +2261,11 @@ mod tests {
 
     #[test]
     fn test_build_model_usages_agy() {
-        let counts = ModelCounts { gemini_flash: 70, gemini_pro: 30, ..Default::default() };
+        let counts = ModelCounts {
+            gemini_flash: 70,
+            gemini_pro: 30,
+            ..Default::default()
+        };
         let usages = build_model_usages(AgentId::Agy, UserTier::AdvancedCli, 500, &counts, "");
         assert_eq!(usages.len(), 2);
         assert_eq!(usages[0].name, "Gemini 3.5 Flash");
@@ -2123,18 +2277,33 @@ mod tests {
 
     #[test]
     fn test_build_model_usages_agy_free_tier() {
-        let counts = ModelCounts { gemini_flash: 80, gemini_pro: 20, ..Default::default() };
+        let counts = ModelCounts {
+            gemini_flash: 80,
+            gemini_pro: 20,
+            ..Default::default()
+        };
         let usages = build_model_usages(AgentId::Agy, UserTier::PersonalFree, 200, &counts, "");
         assert_eq!(usages[0].limit, 160); // 0.80 * 200
-        assert_eq!(usages[1].limit, 40);  // 0.20 * 200
+        assert_eq!(usages[1].limit, 40); // 0.20 * 200
     }
 
     #[test]
     fn test_build_model_usages_opencode_copilot() {
-        let counts = ModelCounts { gpt5: 5, gpt41: 10, claude47: 15, ..Default::default() };
-        let usages = build_model_usages(AgentId::OpenCode, UserTier::Enterprise, 2000, &counts, "GitHub Copilot");
+        let counts = ModelCounts {
+            gpt5: 5,
+            gpt41: 10,
+            claude47: 15,
+            ..Default::default()
+        };
+        let usages = build_model_usages(
+            AgentId::OpenCode,
+            UserTier::Enterprise,
+            2000,
+            &counts,
+            "GitHub Copilot",
+        );
         assert_eq!(usages.len(), 3);
-        assert_eq!(usages[0].limit, 500);  // 0.25 * 2000
+        assert_eq!(usages[0].limit, 500); // 0.25 * 2000
         assert_eq!(usages[1].limit, 1000); // 0.50 * 2000
         assert_eq!(usages[2].limit, 1500); // 0.75 * 2000
     }
