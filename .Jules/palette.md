@@ -77,3 +77,6 @@
 ## 2024-07-29 - Provide contextual data in modals to prevent memory reliance
 **Learning:** When users edit a limit or quota in a modal, only validating the new input against the current usage (e.g. showing "Limit is below current usage") without actually displaying the current usage amount in the modal itself forces the user to rely on memory. This breaks their flow as they might have to close the modal to check their usage before trying again.
 **Action:** Always provide necessary contextual data (like current usage) directly within the modal or form so users can make informed decisions without navigating away.
+## 2026-07-29 - Missing empty state for system telemetry table
+**Learning:** The system telemetry table lacked an empty state when no agents were configured, causing visual inconsistency.
+**Action:** Always wrap table rendering in an `.is_empty()` conditional check. Render a dedicated empty state paragraph with styled copy to clarify the empty state when no data exists.

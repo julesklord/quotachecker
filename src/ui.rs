@@ -306,37 +306,64 @@ fn draw_overview_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
         ]));
     }
 
-    let summary_table = Table::new(
-        summary_rows,
-        [
-            Constraint::Percentage(28),
-            Constraint::Percentage(10),
-            Constraint::Percentage(37),
-            Constraint::Percentage(25),
-        ],
-    )
-    .header(
-        Row::new(vec!["  Agent", "OK", "Account Tier", "Quota"])
-            .style(
-                Style::default()
-                    .fg(color_primary)
-                    .bold()
-                    .add_modifier(Modifier::UNDERLINED),
-            )
-            .bottom_margin(1),
-    )
-    .block(
-        Block::default()
-            .borders(Borders::ALL)
-            .border_type(BorderType::Rounded)
-            .border_style(Style::default().fg(color_primary))
-            .bg(COLOR_CARD)
-            .title(Span::styled(
-                " ◈ SYSTEM TELEMETRY ",
-                Style::default().fg(color_primary).bold(),
+    if summary_rows.is_empty() {
+        let empty_state_p = Paragraph::new(vec![
+            Line::from(""),
+            Line::from(Span::styled(
+                "◌  No agents configured",
+                Style::default().fg(COLOR_MUTED).italic(),
             )),
-    );
-    f.render_widget(summary_table, left_chunks[0]);
+            Line::from(Span::styled(
+                "System telemetry requires at least one active agent.",
+                Style::default().fg(COLOR_DIM).italic(),
+            )),
+        ])
+        .alignment(Alignment::Center)
+        .block(
+            Block::default()
+                .borders(Borders::ALL)
+                .border_type(BorderType::Rounded)
+                .border_style(Style::default().fg(color_primary))
+                .bg(COLOR_CARD)
+                .title(Span::styled(
+                    " ◈ SYSTEM TELEMETRY ",
+                    Style::default().fg(color_primary).bold(),
+                )),
+        );
+        f.render_widget(empty_state_p, left_chunks[0]);
+    } else {
+        let summary_table = Table::new(
+            summary_rows,
+            [
+                Constraint::Percentage(28),
+                Constraint::Percentage(10),
+                Constraint::Percentage(37),
+                Constraint::Percentage(25),
+            ],
+        )
+        .header(
+            Row::new(vec!["  Agent", "OK", "Account Tier", "Quota"])
+                .style(
+                    Style::default()
+                        .fg(color_primary)
+                        .bold()
+                        .add_modifier(Modifier::UNDERLINED),
+                )
+                .bottom_margin(1),
+        )
+        .block(
+            Block::default()
+                .borders(Borders::ALL)
+                .border_type(BorderType::Rounded)
+                .border_style(Style::default().fg(color_primary))
+                .bg(COLOR_CARD)
+                .title(Span::styled(
+                    " ◈ SYSTEM TELEMETRY ",
+                    Style::default().fg(color_primary).bold(),
+                )),
+        );
+        f.render_widget(summary_table, left_chunks[0]);
+    }
 
     // Comparative Agent Usage Chart Card
     let mut chart_lines = Vec::new();
