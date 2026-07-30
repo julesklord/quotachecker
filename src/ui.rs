@@ -306,37 +306,60 @@ fn draw_overview_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
         ]));
     }
 
-    let summary_table = Table::new(
-        summary_rows,
-        [
-            Constraint::Percentage(28),
-            Constraint::Percentage(10),
-            Constraint::Percentage(37),
-            Constraint::Percentage(25),
-        ],
-    )
-    .header(
-        Row::new(vec!["  Agent", "OK", "Account Tier", "Quota"])
-            .style(
-                Style::default()
-                    .fg(color_primary)
-                    .bold()
-                    .add_modifier(Modifier::UNDERLINED),
-            )
-            .bottom_margin(1),
-    )
-    .block(
-        Block::default()
-            .borders(Borders::ALL)
-            .border_type(BorderType::Rounded)
-            .border_style(Style::default().fg(color_primary))
-            .bg(COLOR_CARD)
-            .title(Span::styled(
-                " ◈ SYSTEM TELEMETRY ",
-                Style::default().fg(color_primary).bold(),
+    if summary_rows.is_empty() {
+        let empty_state_p = Paragraph::new(vec![
+            Line::from(""),
+            Line::from(Span::styled(
+                "◌  No agents configured",
+                Style::default().fg(COLOR_MUTED).italic(),
             )),
-    );
-    f.render_widget(summary_table, left_chunks[0]);
+        ])
+        .alignment(Alignment::Center)
+        .block(
+            Block::default()
+                .borders(Borders::ALL)
+                .border_type(BorderType::Rounded)
+                .border_style(Style::default().fg(color_primary))
+                .bg(COLOR_CARD)
+                .title(Span::styled(
+                    " ◈ SYSTEM TELEMETRY ",
+                    Style::default().fg(color_primary).bold(),
+                )),
+        );
+        f.render_widget(empty_state_p, left_chunks[0]);
+    } else {
+        let summary_table = Table::new(
+            summary_rows,
+            [
+                Constraint::Percentage(28),
+                Constraint::Percentage(10),
+                Constraint::Percentage(37),
+                Constraint::Percentage(25),
+            ],
+        )
+        .header(
+            Row::new(vec!["  Agent", "OK", "Account Tier", "Quota"])
+                .style(
+                    Style::default()
+                        .fg(color_primary)
+                        .bold()
+                        .add_modifier(Modifier::UNDERLINED),
+                )
+                .bottom_margin(1),
+        )
+        .block(
+            Block::default()
+                .borders(Borders::ALL)
+                .border_type(BorderType::Rounded)
+                .border_style(Style::default().fg(color_primary))
+                .bg(COLOR_CARD)
+                .title(Span::styled(
+                    " ◈ SYSTEM TELEMETRY ",
+                    Style::default().fg(color_primary).bold(),
+                )),
+        );
+        f.render_widget(summary_table, left_chunks[0]);
+    }
 
     // Comparative Agent Usage Chart Card
     let mut chart_lines = Vec::new();
@@ -1388,44 +1411,67 @@ fn draw_quotas_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
         );
     }
 
-    let budget_table = Table::new(
-        rows,
-        [
-            Constraint::Percentage(22),
-            Constraint::Percentage(26),
-            Constraint::Percentage(14),
-            Constraint::Percentage(18),
-            Constraint::Percentage(20),
-        ],
-    )
-    .header(
-        Row::new(vec![
-            "  Agent",
-            "Account Tier",
-            "Frequency",
-            "Limit",
-            "Action",
-        ])
-        .style(
-            Style::default()
-                .fg(color_primary)
-                .bold()
-                .add_modifier(Modifier::UNDERLINED),
-        )
-        .bottom_margin(1),
-    )
-    .block(
-        Block::default()
-            .borders(Borders::ALL)
-            .border_type(BorderType::Rounded)
-            .border_style(Style::default().fg(color_primary))
-            .bg(COLOR_CARD)
-            .title(Span::styled(
-                " ◈ QUOTA CONFIGURATION ",
-                Style::default().fg(color_primary).bold(),
+    if rows.is_empty() {
+        let empty_state_p = Paragraph::new(vec![
+            Line::from(""),
+            Line::from(Span::styled(
+                "◌  No agents configured",
+                Style::default().fg(COLOR_MUTED).italic(),
             )),
-    );
-    f.render_widget(budget_table, chunks[0]);
+        ])
+        .alignment(Alignment::Center)
+        .block(
+            Block::default()
+                .borders(Borders::ALL)
+                .border_type(BorderType::Rounded)
+                .border_style(Style::default().fg(color_primary))
+                .bg(COLOR_CARD)
+                .title(Span::styled(
+                    " ◈ QUOTA CONFIGURATION ",
+                    Style::default().fg(color_primary).bold(),
+                )),
+        );
+        f.render_widget(empty_state_p, chunks[0]);
+    } else {
+        let budget_table = Table::new(
+            rows,
+            [
+                Constraint::Percentage(22),
+                Constraint::Percentage(26),
+                Constraint::Percentage(14),
+                Constraint::Percentage(18),
+                Constraint::Percentage(20),
+            ],
+        )
+        .header(
+            Row::new(vec![
+                "  Agent",
+                "Account Tier",
+                "Frequency",
+                "Limit",
+                "Action",
+            ])
+            .style(
+                Style::default()
+                    .fg(color_primary)
+                    .bold()
+                    .add_modifier(Modifier::UNDERLINED),
+            )
+            .bottom_margin(1),
+        )
+        .block(
+            Block::default()
+                .borders(Borders::ALL)
+                .border_type(BorderType::Rounded)
+                .border_style(Style::default().fg(color_primary))
+                .bg(COLOR_CARD)
+                .title(Span::styled(
+                    " ◈ QUOTA CONFIGURATION ",
+                    Style::default().fg(color_primary).bold(),
+                )),
+        );
+        f.render_widget(budget_table, chunks[0]);
+    }
 
     // ── Operations Guide ──────────────────────────────────────────────────────
     let docs_lines = vec![
@@ -1569,36 +1615,59 @@ fn draw_settings_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
         );
     }
 
-    let config_table = Table::new(
-        rows,
-        [
-            Constraint::Percentage(38),
-            Constraint::Percentage(24),
-            Constraint::Percentage(38),
-        ],
-    )
-    .header(
-        Row::new(vec!["  Setting", "Value", "Description"])
-            .style(
-                Style::default()
-                    .fg(color_primary)
-                    .bold()
-                    .add_modifier(Modifier::UNDERLINED),
-            )
-            .bottom_margin(1),
-    )
-    .block(
-        Block::default()
-            .borders(Borders::ALL)
-            .border_type(BorderType::Rounded)
-            .border_style(Style::default().fg(color_primary))
-            .bg(COLOR_CARD)
-            .title(Span::styled(
-                " ⚙ TUI SETTINGS ",
-                Style::default().fg(color_primary).bold(),
+    if rows.is_empty() {
+        let empty_state_p = Paragraph::new(vec![
+            Line::from(""),
+            Line::from(Span::styled(
+                "◌  No settings available",
+                Style::default().fg(COLOR_MUTED).italic(),
             )),
-    );
-    f.render_widget(config_table, chunks[0]);
+        ])
+        .alignment(Alignment::Center)
+        .block(
+            Block::default()
+                .borders(Borders::ALL)
+                .border_type(BorderType::Rounded)
+                .border_style(Style::default().fg(color_primary))
+                .bg(COLOR_CARD)
+                .title(Span::styled(
+                    " ⚙ TUI SETTINGS ",
+                    Style::default().fg(color_primary).bold(),
+                )),
+        );
+        f.render_widget(empty_state_p, chunks[0]);
+    } else {
+        let config_table = Table::new(
+            rows,
+            [
+                Constraint::Percentage(38),
+                Constraint::Percentage(24),
+                Constraint::Percentage(38),
+            ],
+        )
+        .header(
+            Row::new(vec!["  Setting", "Value", "Description"])
+                .style(
+                    Style::default()
+                        .fg(color_primary)
+                        .bold()
+                        .add_modifier(Modifier::UNDERLINED),
+                )
+                .bottom_margin(1),
+        )
+        .block(
+            Block::default()
+                .borders(Borders::ALL)
+                .border_type(BorderType::Rounded)
+                .border_style(Style::default().fg(color_primary))
+                .bg(COLOR_CARD)
+                .title(Span::styled(
+                    " ⚙ TUI SETTINGS ",
+                    Style::default().fg(color_primary).bold(),
+                )),
+        );
+        f.render_widget(config_table, chunks[0]);
+    }
 
     // Path details card
     let config_path_str = AppConfig::config_path()
