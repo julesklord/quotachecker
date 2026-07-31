@@ -77,3 +77,7 @@
 ## 2024-07-29 - Provide contextual data in modals to prevent memory reliance
 **Learning:** When users edit a limit or quota in a modal, only validating the new input against the current usage (e.g. showing "Limit is below current usage") without actually displaying the current usage amount in the modal itself forces the user to rely on memory. This breaks their flow as they might have to close the modal to check their usage before trying again.
 **Action:** Always provide necessary contextual data (like current usage) directly within the modal or form so users can make informed decisions without navigating away.
+
+## 2026-07-30 - Missing empty state for tables without rows
+**Learning:** Tables in ratatui UI that lack an empty state fallback will render with only headers and a blank body if their backing dataset is empty, causing visual inconsistency and confusion. I encountered this with the summary_table, budget_table, and config_table when their data vectors were empty.
+**Action:** Always wrap table rendering in an `.is_empty()` conditional check. Render a dedicated `Paragraph` with styled copy to clarify the empty state when no data exists.
