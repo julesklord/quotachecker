@@ -1802,17 +1802,30 @@ fn draw_footer(f: &mut Frame, area: Rect, ctx: &RenderContext) {
         }
     }
 
-    // Version / right side
-    footer_spans.push(Span::styled(
-        " QuotaChecker-TUI v0.3",
+    let footer_text = Line::from(footer_spans);
+    let footer_widget = Paragraph::new(footer_text).style(Style::default());
+
+    let chunks = Layout::default()
+        .direction(Direction::Horizontal)
+        .constraints([Constraint::Percentage(60), Constraint::Percentage(40)])
+        .split(area);
+
+    f.render_widget(footer_widget, chunks[0]);
+
+    let mut right_spans = Vec::new();
+    if let Some(log) = ctx.logs.last() {
+        right_spans.push(Span::styled(
+            format!("{}  ", log),
+            Style::default().fg(COLOR_TEXT),
+        ));
+    }
+    right_spans.push(Span::styled(
+        "QuotaChecker-TUI v0.3",
         Style::default().fg(COLOR_DIM).italic(),
     ));
 
-    let footer_text = Line::from(footer_spans);
-    let footer_widget = Paragraph::new(footer_text)
-        .block(Block::default())
-        .style(Style::default());
-    f.render_widget(footer_widget, area);
+    let right_widget = Paragraph::new(Line::from(right_spans)).alignment(Alignment::Right);
+    f.render_widget(right_widget, chunks[1]);
 }
 
 // Helpers
