@@ -81,3 +81,6 @@
 ## 2026-07-30 - Missing empty state for tables without rows
 **Learning:** Tables in ratatui UI that lack an empty state fallback will render with only headers and a blank body if their backing dataset is empty, causing visual inconsistency and confusion. I encountered this with the summary_table, budget_table, and config_table when their data vectors were empty.
 **Action:** Always wrap table rendering in an `.is_empty()` conditional check. Render a dedicated `Paragraph` with styled copy to clarify the empty state when no data exists.
+## 2026-07-31 - Transient status feedback in footer
+**Learning:** Missing global success/error toasts for contextual actions (like saving settings or editing quotas) leaves users uncertain if their action succeeded, especially if the logs are only visible on a specific tab. TUIs should repurpose global footers for transient status feedback.
+**Action:** Add a log display section to the global footer to show the latest system log message across all tabs.
