@@ -1998,4 +1998,22 @@ mod tests {
         // ratio > hard -> COLOR_DANGER
         assert_eq!(ratio_color(1.1, soft, hard), COLOR_DANGER);
     }
+
+    #[test]
+    fn test_get_primary_color() {
+        assert_eq!(get_primary_color(TuiTheme::Cyan), Color::Rgb(0, 220, 255));
+        assert_eq!(
+            get_primary_color(TuiTheme::Purple),
+            Color::Rgb(168, 85, 247)
+        );
+        assert_eq!(
+            get_primary_color(TuiTheme::Emerald),
+            Color::Rgb(56, 214, 115)
+        );
+        assert_eq!(get_primary_color(TuiTheme::Amber), Color::Rgb(251, 197, 49));
+        assert_eq!(
+            get_primary_color(TuiTheme::Monochrome),
+            Color::Rgb(200, 200, 210)
+        );
+    }
 }
