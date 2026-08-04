@@ -283,7 +283,7 @@ fn draw_overview_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
         }
 
         summary_rows.push(Row::new(vec![
-            Cell::new(agent.name.clone()).style(Style::default().fg(agent_color).bold()),
+            Cell::new(agent.name.as_str()).style(Style::default().fg(agent_color).bold()),
             Cell::new(status_symbol).style(Style::default().fg(status_color).bold()),
             Cell::new(agent.user_tier.display_name()).style(Style::default().fg(if is_inst {
                 COLOR_TEXT
@@ -763,7 +763,7 @@ fn draw_agents_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
                     .bold(),
             ),
             Span::styled(status_dot, Style::default().fg(status_color)),
-            Span::styled(agent.name.clone(), name_style),
+            Span::styled(agent.name.as_str(), name_style),
         ])));
     }
 
@@ -851,25 +851,21 @@ fn draw_agents_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
     let meta_rows = vec![
         Row::new(vec![
             Cell::new("Binary Path:"),
-            Cell::new(selected_agent.executable_path.clone().unwrap_or_default())
+            Cell::new(selected_agent.executable_path.as_deref().unwrap_or_default())
                 .style(Style::default().fg(COLOR_TEXT)),
         ]),
         Row::new(vec![
             Cell::new("Version Detected:"),
             Cell::new(
                 selected_agent
-                    .version
-                    .clone()
-                    .unwrap_or_else(|| "N/A".to_string()),
+                    .version.as_deref().unwrap_or("N/A"),
             ),
         ]),
         Row::new(vec![
             Cell::new("Config Directory:"),
             Cell::new(
                 selected_agent
-                    .config_path
-                    .clone()
-                    .unwrap_or_else(|| "None".to_string()),
+                    .config_path.as_deref().unwrap_or("None"),
             ),
         ]),
         Row::new(vec![
@@ -891,7 +887,7 @@ fn draw_agents_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
         ]),
         Row::new(vec![
             Cell::new("Auth Identity / User:"),
-            Cell::new(selected_agent.auth_info.clone()).style(Style::default().fg(COLOR_MUTED)),
+            Cell::new(selected_agent.auth_info.as_str()).style(Style::default().fg(COLOR_MUTED)),
         ]),
     ];
 
@@ -1608,7 +1604,7 @@ fn draw_settings_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
         rows.push(
             Row::new(vec![
                 Cell::new(format!("{} {}", prefix, name)).style(name_style),
-                Cell::new(val.clone()).style(Style::default().fg(val_color).bold()),
+                Cell::new(val.as_str()).style(Style::default().fg(val_color).bold()),
                 Cell::new(desc.to_string()).style(Style::default().fg(COLOR_MUTED)),
             ])
             .style(row_style),
