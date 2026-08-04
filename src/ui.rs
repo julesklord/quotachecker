@@ -1977,6 +1977,23 @@ mod tests {
     use super::*;
 
     #[test]
+    fn test_spinner_frame() {
+        // The frames array has 10 elements. The index logic is: (tick / 2) % 10
+        assert_eq!(spinner_frame(0), "⠋");
+        assert_eq!(spinner_frame(1), "⠋");
+
+        assert_eq!(spinner_frame(2), "⠙");
+        assert_eq!(spinner_frame(3), "⠙");
+
+        assert_eq!(spinner_frame(18), "⠏");
+        assert_eq!(spinner_frame(19), "⠏");
+
+        // Test wrap-around behavior
+        assert_eq!(spinner_frame(20), "⠋");
+        assert_eq!(spinner_frame(101), "⠋");
+    }
+
+    #[test]
     fn test_ratio_color() {
         let soft = 0.8;
         let hard = 1.0;
