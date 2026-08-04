@@ -1977,6 +1977,19 @@ mod tests {
     use super::*;
 
     #[test]
+    fn test_get_agent_color() {
+        assert_eq!(get_agent_color(AgentId::Codex), COLOR_CODEX);
+        assert_eq!(get_agent_color(AgentId::OpenCode), COLOR_OPENCODE);
+        assert_eq!(get_agent_color(AgentId::Agy), COLOR_AGY);
+        assert_eq!(get_agent_color(AgentId::Zed), COLOR_ZED);
+        assert_eq!(get_agent_color(AgentId::Aider), COLOR_AIDER);
+        assert_eq!(get_agent_color(AgentId::Ollama), COLOR_OLLAMA);
+        assert_eq!(get_agent_color(AgentId::Continue), COLOR_CONTINUE);
+        assert_eq!(get_agent_color(AgentId::Cody), COLOR_CODY);
+        assert_eq!(get_agent_color(AgentId::Supermaven), COLOR_SUPERMAVEN);
+    }
+
+    #[test]
     fn test_ratio_color() {
         let soft = 0.8;
         let hard = 1.0;
