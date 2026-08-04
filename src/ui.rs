@@ -2007,4 +2007,32 @@ mod tests {
         // ratio > hard -> COLOR_DANGER
         assert_eq!(ratio_color(1.1, soft, hard), COLOR_DANGER);
     }
+
+    #[test]
+    fn test_centered_rect() {
+        // Happy path
+        let base = Rect { x: 0, y: 0, width: 100, height: 100 };
+        let r = centered_rect(50, 20, base);
+        assert_eq!(r, Rect { x: 25, y: 40, width: 50, height: 20 });
+
+        // Non-zero base offset
+        let base = Rect { x: 10, y: 20, width: 100, height: 100 };
+        let r = centered_rect(50, 20, base);
+        assert_eq!(r, Rect { x: 35, y: 60, width: 50, height: 20 });
+
+        // Height larger than base height
+        let base = Rect { x: 0, y: 0, width: 100, height: 50 };
+        let r = centered_rect(50, 100, base);
+        assert_eq!(r, Rect { x: 25, y: 0, width: 50, height: 50 });
+
+        // percent_x > 100
+        let base = Rect { x: 0, y: 0, width: 100, height: 100 };
+        let r = centered_rect(150, 20, base);
+        assert_eq!(r, Rect { x: 0, y: 40, width: 100, height: 20 });
+
+        // Zero size
+        let base = Rect { x: 0, y: 0, width: 0, height: 0 };
+        let r = centered_rect(50, 20, base);
+        assert_eq!(r, Rect { x: 0, y: 0, width: 0, height: 0 });
+    }
 }
