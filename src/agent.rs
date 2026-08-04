@@ -1336,12 +1336,31 @@ impl AgentScanner {
                             if let Ok(content) = fs::read_to_string(path) {
                                 let mut file_requests = 0;
                                 for line in content.lines() {
-                                    if line.contains("Command:") || line.contains("Prompt:") {
+                                    let bytes = line.as_bytes();
+                                    let mut has_req = false;
+                                    let mut has_prop = false;
+                                    for i in 0..bytes.len() {
+                                        let b = bytes[i];
+                                        if b == b'C' || b == b'P' {
+                                            let tail = &bytes[i..];
+                                            if !has_req
+                                                && (tail.starts_with(b"Command:")
+                                                    || tail.starts_with(b"Prompt:"))
+                                            {
+                                                has_req = true;
+                                            }
+                                            if !has_prop && tail.starts_with(b"Propagating selected model override to backend") {
+                                                has_prop = true;
+                                            }
+                                            if has_req && has_prop {
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    if has_req {
                                         file_requests += 1;
                                     }
-                                    if line
-                                        .contains("Propagating selected model override to backend")
-                                    {
+                                    if has_prop {
                                         if line.contains("Flash") || line.contains("flash") {
                                             agy_flash_count += 1;
                                         } else if line.contains("Pro") || line.contains("pro") {
