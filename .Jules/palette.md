@@ -84,3 +84,6 @@
 ## 2026-07-31 - Transient status feedback in footer
 **Learning:** Missing global success/error toasts for contextual actions (like saving settings or editing quotas) leaves users uncertain if their action succeeded, especially if the logs are only visible on a specific tab. TUIs should repurpose global footers for transient status feedback.
 **Action:** Add a log display section to the global footer to show the latest system log message across all tabs.
+## 2024-07-31 - Differentiate identical value input in forms
+**Learning:** In TUI modals, when a user inputs a value identical to the currently active state (e.g. entering '100' when the limit is already '100') and no specific feedback is provided, users may be confused whether their action succeeded or was ignored.
+**Action:** When validating form inputs that match the existing state, display a neutral, informative message (e.g., 'Limit is unchanged') instead of falling back to default behavior or falsely implying a change was made.

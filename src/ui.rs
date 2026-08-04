@@ -1952,7 +1952,13 @@ fn draw_budget_modal(f: &mut Frame, area: Rect, ctx: &RenderContext) {
         )));
         f.render_widget(warning_p, form_layout[3]);
     } else if let Ok(new_limit) = display_val.parse::<u32>() {
-        if new_limit < active_agent.quota_used {
+        if new_limit == active_agent.quota_limit {
+            let info_p = Paragraph::new(Line::from(Span::styled(
+                " ℹ Limit is unchanged",
+                Style::default().fg(COLOR_MUTED).italic(),
+            )));
+            f.render_widget(info_p, form_layout[3]);
+        } else if new_limit < active_agent.quota_used {
             let warning_p = Paragraph::new(Line::from(Span::styled(
                 " ⚠ Limit is below current usage",
                 Style::default().fg(COLOR_WARN).italic(),
