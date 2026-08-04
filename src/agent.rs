@@ -1329,32 +1329,51 @@ impl AgentScanner {
 
             let log_dir = agy_config.join("log");
             if log_dir.exists() {
+                let mut paths = Vec::new();
                 if let Ok(entries) = fs::read_dir(&log_dir) {
                     for entry in entries.flatten() {
                         let path = entry.path();
                         if path.extension().and_then(|s| s.to_str()) == Some("log") {
-                            if let Ok(content) = fs::read_to_string(path) {
-                                let mut file_requests = 0;
-                                for line in content.lines() {
-                                    if line.contains("Command:") || line.contains("Prompt:") {
-                                        file_requests += 1;
-                                    }
-                                    if line
-                                        .contains("Propagating selected model override to backend")
-                                    {
-                                        if line.contains("Flash") || line.contains("flash") {
-                                            agy_flash_count += 1;
-                                        } else if line.contains("Pro") || line.contains("pro") {
-                                            agy_pro_count += 1;
-                                        }
-                                    }
-                                }
-                                agy_requests += file_requests;
-                                agy_sessions += 1;
-                            }
+                            paths.push(path);
                         }
                     }
                 }
+
+                use rayon::prelude::*;
+                let (requests, flash, pro, sessions) = paths
+                    .par_iter()
+                    .map(|path| {
+                        let mut file_requests = 0;
+                        let mut file_flash = 0;
+                        let mut file_pro = 0;
+                        let mut file_sessions = 0;
+
+                        if let Ok(content) = fs::read_to_string(path) {
+                            file_sessions = 1;
+                            for line in content.lines() {
+                                if line.contains("Command:") || line.contains("Prompt:") {
+                                    file_requests += 1;
+                                }
+                                if line.contains("Propagating selected model override to backend") {
+                                    if line.contains("Flash") || line.contains("flash") {
+                                        file_flash += 1;
+                                    } else if line.contains("Pro") || line.contains("pro") {
+                                        file_pro += 1;
+                                    }
+                                }
+                            }
+                        }
+                        (file_requests, file_flash, file_pro, file_sessions)
+                    })
+                    .reduce(
+                        || (0, 0, 0, 0),
+                        |a, b| (a.0 + b.0, a.1 + b.1, a.2 + b.2, a.3 + b.3),
+                    );
+
+                agy_requests += requests;
+                agy_flash_count += flash;
+                agy_pro_count += pro;
+                agy_sessions += sessions;
             }
         }
 
