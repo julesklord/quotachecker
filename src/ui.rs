@@ -1998,4 +1998,22 @@ mod tests {
         // ratio > hard -> COLOR_DANGER
         assert_eq!(ratio_color(1.1, soft, hard), COLOR_DANGER);
     }
+
+    #[test]
+    fn test_make_progress_bar() {
+        let width = 10;
+
+        // Empty
+        assert_eq!(make_progress_bar(0.0, width), "░░░░░░░░░░");
+
+        // Half block
+        assert_eq!(make_progress_bar(0.05, width), "▓░░░░░░░░░");
+
+        // Exact half
+        assert_eq!(make_progress_bar(0.5, width), "████▓░░░░░");
+
+        // Full
+        assert_eq!(make_progress_bar(1.0, width), "██████████");
+        assert_eq!(make_progress_bar(1.5, width), "██████████");
+    }
 }
