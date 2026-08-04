@@ -1953,6 +1953,15 @@ mod tests {
         assert_eq!(result, Some(("Test User".to_string(), "".to_string())));
         let _ = fs::remove_file(path);
     }
+#[test]
+fn test_get_git_identity_caching() {
+    let result1 = get_git_identity();
+    let result2 = get_git_identity();
+    assert_eq!(result1, result2);
+    if let Some((name, email)) = result1 {
+        assert!(!name.is_empty() || !email.is_empty());
+    }
+}
     use std::fs;
     use std::os::unix::fs::PermissionsExt;
     use std::path::PathBuf;
