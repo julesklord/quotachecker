@@ -17,6 +17,7 @@ chrono = "0.4"
 rusqlite = { version = "0.32", features = ["bundled"] }
 directories = "5.0"
 shlex = "2.0.1"
+rayon = "1.12.0"
 
 [dev-dependencies]
 tempfile = "3.27.0"
