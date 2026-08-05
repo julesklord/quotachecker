@@ -182,7 +182,7 @@ impl App {
                 self.add_log("Error saving configuration to disk.");
             }
         } else {
-            self.add_log("Invalid numeric format.");
+            if self.editing_value.is_empty() { self.add_log("Limit cannot be empty."); } else { self.add_log("Number too large."); }
         }
     }
 
