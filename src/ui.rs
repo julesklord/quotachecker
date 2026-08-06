@@ -1791,7 +1791,6 @@ fn draw_footer(f: &mut Frame, area: Rect, ctx: &RenderContext) {
                     footer_spans.extend(kpill("Enter/e", "Open editor", color_primary));
                 } else {
                     footer_spans.extend(kpill("Enter/+/-/h/l", "Cycle value", color_primary));
-                    footer_spans.extend(kpill("e", "Open editor", COLOR_DIM));
                 }
             }
             _ => {}
