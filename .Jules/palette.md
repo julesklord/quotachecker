@@ -87,3 +87,6 @@
 ## 2024-07-31 - Differentiate identical value input in forms
 **Learning:** In TUI modals, when a user inputs a value identical to the currently active state (e.g. entering '100' when the limit is already '100') and no specific feedback is provided, users may be confused whether their action succeeded or was ignored.
 **Action:** When validating form inputs that match the existing state, display a neutral, informative message (e.g., 'Limit is unchanged') instead of falling back to default behavior or falsely implying a change was made.
+## 2026-08-06 - Prevent global keybind overriding
+**Learning:** In a TUI, context keybinds that show up for uneditable actions confuse the user. The 'e' keybind was available globally in Settings tab to edit the config.json, but it was being advertised incorrectly as available for all setting indices when it's only meant for the final item.
+**Action:** Restrict contextual actions and their hint rendering to the items where they actually apply.

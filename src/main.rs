@@ -507,37 +507,39 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
                         KeyCode::Char('e') => {
                             if app.active_tab == 4 {
-                                let _ = disable_raw_mode();
-                                let mut stdout = io::stdout();
-                                let _ = execute!(stdout, LeaveAlternateScreen);
+                                if app.selected_setting_idx == 4 {
+                                    let _ = disable_raw_mode();
+                                    let mut stdout = io::stdout();
+                                    let _ = execute!(stdout, LeaveAlternateScreen);
 
-                                let editor =
-                                    std::env::var("EDITOR").unwrap_or_else(|_| "nano".to_string());
-                                if let Some(path) = AppConfig::config_path() {
-                                    if let Some(mut args) = shlex::split(&editor) {
-                                        if !args.is_empty() {
-                                            let program = args.remove(0);
-                                            let program_name = std::path::Path::new(&program).file_name().and_then(|n| n.to_str()).unwrap_or("");
-                                            let allowed_editors = ["nano", "vim", "nvim", "vi", "emacs", "hx", "micro"];
-                                            if allowed_editors.contains(&program_name) {
-                                                let _ = std::process::Command::new(program)
-                                                    .args(&args)
-                                                    .arg(&path)
-                                                    .status();
+                                    let editor =
+                                        std::env::var("EDITOR").unwrap_or_else(|_| "nano".to_string());
+                                    if let Some(path) = AppConfig::config_path() {
+                                        if let Some(mut args) = shlex::split(&editor) {
+                                            if !args.is_empty() {
+                                                let program = args.remove(0);
+                                                let program_name = std::path::Path::new(&program).file_name().and_then(|n| n.to_str()).unwrap_or("");
+                                                let allowed_editors = ["nano", "vim", "nvim", "vi", "emacs", "hx", "micro"];
+                                                if allowed_editors.contains(&program_name) {
+                                                    let _ = std::process::Command::new(program)
+                                                        .args(&args)
+                                                        .arg(&path)
+                                                        .status();
+                                                }
                                             }
                                         }
+
+                                        *app.config.write().unwrap() = AppConfig::load();
+                                        app.add_log(
+                                            "Configuration reloaded from disk after manual edit.",
+                                        );
                                     }
 
-                                    *app.config.write().unwrap() = AppConfig::load();
-                                    app.add_log(
-                                        "Configuration reloaded from disk after manual edit.",
-                                    );
+                                    let _ = enable_raw_mode();
+                                    let mut stdout = io::stdout();
+                                    let _ = execute!(stdout, EnterAlternateScreen);
+                                    let _ = terminal.clear();
                                 }
-
-                                let _ = enable_raw_mode();
-                                let mut stdout = io::stdout();
-                                let _ = execute!(stdout, EnterAlternateScreen);
-                                let _ = terminal.clear();
                             }
                         }
 
