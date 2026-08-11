@@ -87,3 +87,6 @@
 ## 2024-07-31 - Differentiate identical value input in forms
 **Learning:** In TUI modals, when a user inputs a value identical to the currently active state (e.g. entering '100' when the limit is already '100') and no specific feedback is provided, users may be confused whether their action succeeded or was ignored.
 **Action:** When validating form inputs that match the existing state, display a neutral, informative message (e.g., 'Limit is unchanged') instead of falling back to default behavior or falsely implying a change was made.
+## 2024-08-01 - Specific overflow messages for numeric bounds
+**Learning:** In TUI form validations, if an input field is already restricted to digits, use specific error messages (e.g., 'Number too large') for type-bound overflow rather than generic 'Valid number required' errors to reduce user confusion.
+**Action:** Always check the input content when parsing fails. If the content is structurally sound but fails bounds validation, provide a specific overflow error instead of a generic type error.
