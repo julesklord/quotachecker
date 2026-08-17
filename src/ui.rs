@@ -1947,7 +1947,7 @@ fn draw_budget_modal(f: &mut Frame, area: Rect, ctx: &RenderContext) {
         f.render_widget(hint_p, form_layout[3]);
     } else if !is_valid {
         let warning_p = Paragraph::new(Line::from(Span::styled(
-            " ⚠ Valid number required",
+            " ⚠ Number too large",
             Style::default().fg(COLOR_DANGER).italic(),
         )));
         f.render_widget(warning_p, form_layout[3]);
