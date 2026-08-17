@@ -90,3 +90,6 @@
 ## 2024-08-15 - Specific error messages for type-bound overflows
 **Learning:** When form inputs are pre-filtered to only accept digits, generic "Valid number required" errors are confusing when users hit a type-bound size limit (e.g., u32 max). They assume their format is wrong rather than the value being too large.
 **Action:** In TUI form validations, if an input field is already restricted to digits, use specific error messages (e.g., 'Number too large') for type-bound overflow rather than generic 'Valid number required' errors to reduce user confusion.
+## 2023-10-27 - Actionable CTAs in Empty States
+**Learning:** Empty states without Call-to-Actions (CTAs) leave users confused in terminal applications where standard navigation paradigms are not obvious. Providing explicit keyboard shortcut instructions directly in the empty state text reduces cognitive load.
+**Action:** Always include actionable instructions (e.g., "Press r to refresh") inside the empty state components of data grids or lists.

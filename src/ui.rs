@@ -1122,7 +1122,7 @@ fn draw_agents_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
                 Style::default().fg(COLOR_MUTED).italic(),
             )),
             Line::from(Span::styled(
-                "No model usage telemetry available for this agent.",
+                "No model usage telemetry available. Use the agent or press 'r' to refresh.",
                 Style::default().fg(COLOR_DIM).italic(),
             )),
         ])
@@ -1271,7 +1271,7 @@ fn draw_sessions_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
                 Style::default().fg(COLOR_MUTED).italic(),
             )),
             Line::from(Span::styled(
-                "Make requests with your AI assistants to see them here.",
+                "Make requests with your AI assistants or press 'r' to force refresh.",
                 Style::default().fg(COLOR_DIM).italic(),
             )),
         ])
@@ -1413,6 +1413,10 @@ fn draw_quotas_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
             Line::from(Span::styled(
                 "◌  No agents configured",
                 Style::default().fg(COLOR_MUTED).italic(),
+            )),
+            Line::from(Span::styled(
+                "Install an AI assistant or press 'r' to scan again.",
+                Style::default().fg(COLOR_DIM).italic(),
             )),
         ])
         .alignment(Alignment::Center)
