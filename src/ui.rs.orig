@@ -785,36 +785,6 @@ fn draw_agents_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
     );
     f.render_widget(agents_list, chunks[0]);
 
-    if ctx.agents.is_empty() {
-        let card_block = Block::default()
-            .borders(Borders::ALL)
-            .border_type(BorderType::Rounded)
-            .border_style(Style::default().fg(COLOR_DIM))
-            .bg(COLOR_CARD)
-            .title(Span::styled(
-                " ◈ AGENT INFO ",
-                Style::default().fg(COLOR_DIM),
-            ));
-
-        let uninst_p = Paragraph::new(vec![
-            Line::from(""),
-            Line::from(""),
-            Line::from(Span::styled(
-                "◌  No agent selected",
-                Style::default().fg(COLOR_DIM).italic(),
-            )),
-            Line::from(Span::styled(
-                "Agent list is empty",
-                Style::default().fg(COLOR_DIM).italic(),
-            )),
-        ])
-        .alignment(Alignment::Center)
-        .block(card_block);
-
-        f.render_widget(uninst_p, chunks[1]);
-        return;
-    }
-
     // Selected Agent details on the Right
     let selected_agent = &ctx.agents[ctx.selected_agent_idx];
     let agent_color = get_agent_color(selected_agent.id);
@@ -881,21 +851,22 @@ fn draw_agents_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
     let meta_rows = vec![
         Row::new(vec![
             Cell::new("Binary Path:"),
-            Cell::new(
-                selected_agent
-                    .executable_path
-                    .as_deref()
-                    .unwrap_or_default(),
-            )
-            .style(Style::default().fg(COLOR_TEXT)),
+            Cell::new(selected_agent.executable_path.as_deref().unwrap_or_default())
+                .style(Style::default().fg(COLOR_TEXT)),
         ]),
         Row::new(vec![
             Cell::new("Version Detected:"),
-            Cell::new(selected_agent.version.as_deref().unwrap_or("N/A")),
+            Cell::new(
+                selected_agent
+                    .version.as_deref().unwrap_or("N/A"),
+            ),
         ]),
         Row::new(vec![
             Cell::new("Config Directory:"),
-            Cell::new(selected_agent.config_path.as_deref().unwrap_or("None")),
+            Cell::new(
+                selected_agent
+                    .config_path.as_deref().unwrap_or("None"),
+            ),
         ]),
         Row::new(vec![
             Cell::new("Auth Status:"),
@@ -1539,8 +1510,7 @@ fn draw_quotas_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
                 Span::styled("  Select agent   ", Style::default().fg(COLOR_MUTED)),
             ];
 
-            if !ctx.agents.is_empty()
-                && ctx.agents[ctx.selected_agent_idx].executable_path.is_some()
+            if ctx.agents[ctx.selected_agent_idx].executable_path.is_some()
                 && ctx.agents[ctx.selected_agent_idx].quota_type
                     != crate::agent::QuotaType::Unlimited
             {
@@ -1811,14 +1781,12 @@ fn draw_footer(f: &mut Frame, area: Rect, ctx: &RenderContext) {
         // Tab-specific
         match ctx.active_tab {
             1 | 3 => {
-                if !ctx.agents.is_empty() {
-                    footer_spans.extend(kpill("↑↓/k/j", "Select agent", COLOR_DIM));
-                    if ctx.agents[ctx.selected_agent_idx].executable_path.is_some()
-                        && ctx.agents[ctx.selected_agent_idx].quota_type
-                            != crate::agent::QuotaType::Unlimited
-                    {
-                        footer_spans.extend(kpill("Enter/s", "Edit quota", color_primary));
-                    }
+                footer_spans.extend(kpill("↑↓/k/j", "Select agent", COLOR_DIM));
+                if ctx.agents[ctx.selected_agent_idx].executable_path.is_some()
+                    && ctx.agents[ctx.selected_agent_idx].quota_type
+                        != crate::agent::QuotaType::Unlimited
+                {
+                    footer_spans.extend(kpill("Enter/s", "Edit quota", color_primary));
                 }
             }
             4 => {
@@ -2053,93 +2021,28 @@ mod tests {
     #[test]
     fn test_centered_rect() {
         // Happy path
-        let base = Rect {
-            x: 0,
-            y: 0,
-            width: 100,
-            height: 100,
-        };
+        let base = Rect { x: 0, y: 0, width: 100, height: 100 };
         let r = centered_rect(50, 20, base);
-        assert_eq!(
-            r,
-            Rect {
-                x: 25,
-                y: 40,
-                width: 50,
-                height: 20
-            }
-        );
+        assert_eq!(r, Rect { x: 25, y: 40, width: 50, height: 20 });
 
         // Non-zero base offset
-        let base = Rect {
-            x: 10,
-            y: 20,
-            width: 100,
-            height: 100,
-        };
+        let base = Rect { x: 10, y: 20, width: 100, height: 100 };
         let r = centered_rect(50, 20, base);
-        assert_eq!(
-            r,
-            Rect {
-                x: 35,
-                y: 60,
-                width: 50,
-                height: 20
-            }
-        );
+        assert_eq!(r, Rect { x: 35, y: 60, width: 50, height: 20 });
 
         // Height larger than base height
-        let base = Rect {
-            x: 0,
-            y: 0,
-            width: 100,
-            height: 50,
-        };
+        let base = Rect { x: 0, y: 0, width: 100, height: 50 };
         let r = centered_rect(50, 100, base);
-        assert_eq!(
-            r,
-            Rect {
-                x: 25,
-                y: 0,
-                width: 50,
-                height: 50
-            }
-        );
+        assert_eq!(r, Rect { x: 25, y: 0, width: 50, height: 50 });
 
         // percent_x > 100
-        let base = Rect {
-            x: 0,
-            y: 0,
-            width: 100,
-            height: 100,
-        };
+        let base = Rect { x: 0, y: 0, width: 100, height: 100 };
         let r = centered_rect(150, 20, base);
-        assert_eq!(
-            r,
-            Rect {
-                x: 0,
-                y: 40,
-                width: 100,
-                height: 20
-            }
-        );
+        assert_eq!(r, Rect { x: 0, y: 40, width: 100, height: 20 });
 
         // Zero size
-        let base = Rect {
-            x: 0,
-            y: 0,
-            width: 0,
-            height: 0,
-        };
+        let base = Rect { x: 0, y: 0, width: 0, height: 0 };
         let r = centered_rect(50, 20, base);
-        assert_eq!(
-            r,
-            Rect {
-                x: 0,
-                y: 0,
-                width: 0,
-                height: 0
-            }
-        );
+        assert_eq!(r, Rect { x: 0, y: 0, width: 0, height: 0 });
     }
 }

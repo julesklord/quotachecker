@@ -517,8 +517,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                                     if let Some(mut args) = shlex::split(&editor) {
                                         if !args.is_empty() {
                                             let program = args.remove(0);
-                                            let program_name = std::path::Path::new(&program).file_name().and_then(|n| n.to_str()).unwrap_or("");
-                                            let allowed_editors = ["nano", "vim", "nvim", "vi", "emacs", "hx", "micro"];
+                                            let program_name = std::path::Path::new(&program)
+                                                .file_name()
+                                                .and_then(|n| n.to_str())
+                                                .unwrap_or("");
+                                            let allowed_editors = [
+                                                "nano", "vim", "nvim", "vi", "emacs", "hx", "micro",
+                                            ];
                                             if allowed_editors.contains(&program_name) {
                                                 let _ = std::process::Command::new(program)
                                                     .args(&args)
@@ -557,8 +562,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                                     if let Some(mut args) = shlex::split(&editor) {
                                         if !args.is_empty() {
                                             let program = args.remove(0);
-                                            let program_name = std::path::Path::new(&program).file_name().and_then(|n| n.to_str()).unwrap_or("");
-                                            let allowed_editors = ["nano", "vim", "nvim", "vi", "emacs", "hx", "micro"];
+                                            let program_name = std::path::Path::new(&program)
+                                                .file_name()
+                                                .and_then(|n| n.to_str())
+                                                .unwrap_or("");
+                                            let allowed_editors = [
+                                                "nano", "vim", "nvim", "vi", "emacs", "hx", "micro",
+                                            ];
                                             if allowed_editors.contains(&program_name) {
                                                 let _ = std::process::Command::new(program)
                                                     .args(&args)
