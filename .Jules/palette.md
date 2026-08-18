@@ -93,3 +93,6 @@
 ## 2023-10-27 - Actionable CTAs in Empty States
 **Learning:** Empty states without Call-to-Actions (CTAs) leave users confused in terminal applications where standard navigation paradigms are not obvious. Providing explicit keyboard shortcut instructions directly in the empty state text reduces cognitive load.
 **Action:** Always include actionable instructions (e.g., "Press r to refresh") inside the empty state components of data grids or lists.
+## 2026-08-18 - Missing empty state causes out-of-bounds panics
+**Learning:** In TUI applications using Ratatui, rendering detail panes or context-specific keybindings based on a selected index into a data array can cause silent crashes (panics) if the data array is empty. Furthermore, showing contextual keybindings (like "Select" or "Edit") when there is nothing to select or edit is confusing to users.
+**Action:** Always wrap the rendering of detail panes and contextual keybindings with an `!is_empty()` check on the backing dataset. When empty, explicitly render a dedicated empty state paragraph to prevent panics and clarify the application state to the user.
