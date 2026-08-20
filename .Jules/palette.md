@@ -96,3 +96,6 @@
 ## 2026-08-18 - Missing empty state causes out-of-bounds panics
 **Learning:** In TUI applications using Ratatui, rendering detail panes or context-specific keybindings based on a selected index into a data array can cause silent crashes (panics) if the data array is empty. Furthermore, showing contextual keybindings (like "Select" or "Edit") when there is nothing to select or edit is confusing to users.
 **Action:** Always wrap the rendering of detail panes and contextual keybindings with an `!is_empty()` check on the backing dataset. When empty, explicitly render a dedicated empty state paragraph to prevent panics and clarify the application state to the user.
+## 2024-05-24 - Empty State CTAs
+**Learning:** Empty states without Call-to-Actions (CTAs) leave users at a dead-end and cause confusion.
+**Action:** Always include actionable instructions (e.g., "Press 'r' to refresh") in empty state copy to guide users forward.
