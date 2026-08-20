@@ -313,6 +313,10 @@ fn draw_overview_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
                 "◌  No agents configured",
                 Style::default().fg(COLOR_MUTED).italic(),
             )),
+            Line::from(Span::styled(
+                "Install an agent and press 'r' to refresh.",
+                Style::default().fg(COLOR_DIM).italic(),
+            )),
         ])
         .alignment(Alignment::Center)
         .block(
@@ -804,7 +808,7 @@ fn draw_agents_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
                 Style::default().fg(COLOR_DIM).italic(),
             )),
             Line::from(Span::styled(
-                "Agent list is empty",
+                "Agent list is empty. Press 'r' to rescan.",
                 Style::default().fg(COLOR_DIM).italic(),
             )),
         ])
@@ -1651,6 +1655,10 @@ fn draw_settings_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
             Line::from(Span::styled(
                 "◌  No settings available",
                 Style::default().fg(COLOR_MUTED).italic(),
+            )),
+            Line::from(Span::styled(
+                "Press 'e' to manually edit the config file.",
+                Style::default().fg(COLOR_DIM).italic(),
             )),
         ])
         .alignment(Alignment::Center)
