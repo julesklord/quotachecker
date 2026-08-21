@@ -1879,6 +1879,35 @@ fn draw_budget_modal(f: &mut Frame, area: Rect, ctx: &RenderContext) {
     f.render_widget(Clear, shadow_rect);
     f.render_widget(Clear, modal_rect);
 
+    if ctx.agents.is_empty() {
+        let empty_modal_block = Block::default()
+            .borders(Borders::ALL)
+            .border_type(BorderType::Rounded)
+            .border_style(Style::default().fg(color_primary))
+            .bg(Color::Rgb(18, 20, 28))
+            .title(Span::styled(
+                " ⚙ QUOTA LIMIT ",
+                Style::default().fg(color_primary).bold(),
+            ))
+            .title_bottom(Span::styled(
+                " Esc ✘ Cancel ",
+                Style::default().fg(COLOR_MUTED),
+            ));
+
+        let empty_p = Paragraph::new(vec![
+            Line::from(""),
+            Line::from(Span::styled(
+                "◌  No agents configured",
+                Style::default().fg(COLOR_MUTED).italic(),
+            )),
+        ])
+        .alignment(Alignment::Center)
+        .block(empty_modal_block);
+
+        f.render_widget(empty_p, modal_rect);
+        return;
+    }
+
     let active_agent = &ctx.agents[ctx.selected_agent_idx];
     let agent_color = get_agent_color(active_agent.id);
 
