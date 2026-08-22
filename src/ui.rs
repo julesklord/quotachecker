@@ -313,6 +313,10 @@ fn draw_overview_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
                 "◌  No agents configured",
                 Style::default().fg(COLOR_MUTED).italic(),
             )),
+            Line::from(Span::styled(
+                "Press 'r' to refresh",
+                Style::default().fg(COLOR_DIM),
+            )),
         ])
         .alignment(Alignment::Center)
         .block(
@@ -1651,6 +1655,10 @@ fn draw_settings_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
             Line::from(Span::styled(
                 "◌  No settings available",
                 Style::default().fg(COLOR_MUTED).italic(),
+            )),
+            Line::from(Span::styled(
+                "Press 'r' to refresh",
+                Style::default().fg(COLOR_DIM),
             )),
         ])
         .alignment(Alignment::Center)
