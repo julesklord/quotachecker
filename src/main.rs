@@ -470,7 +470,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
                         // Select Agent list or settings list
                         KeyCode::Up | KeyCode::Char('k') => {
-                            if app.active_tab == 1 || app.active_tab == 3 {
+                            if (app.active_tab == 1 || app.active_tab == 3) && !app.agents.is_empty() {
                                 if app.selected_agent_idx > 0 {
                                     app.selected_agent_idx -= 1;
                                 } else {
@@ -485,7 +485,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                             }
                         }
                         KeyCode::Down | KeyCode::Char('j') => {
-                            if app.active_tab == 1 || app.active_tab == 3 {
+                            if (app.active_tab == 1 || app.active_tab == 3) && !app.agents.is_empty() {
                                 app.selected_agent_idx =
                                     (app.selected_agent_idx + 1) % app.agents.len();
                             } else if app.active_tab == 4 {
@@ -495,7 +495,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
                         // Open Editor
                         KeyCode::Char('s') => {
-                            if app.active_tab == 1 || app.active_tab == 3 {
+                            if (app.active_tab == 1 || app.active_tab == 3) && !app.agents.is_empty() {
                                 app.open_budget_modal();
                             }
                         }
@@ -547,7 +547,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                         }
 
                         KeyCode::Enter if app.active_tab == 1 || app.active_tab == 3 => {
-                            app.open_budget_modal();
+                            if !app.agents.is_empty() {
+                                app.open_budget_modal();
+                            }
                         }
 
                         KeyCode::Enter if app.active_tab == 4 => {
