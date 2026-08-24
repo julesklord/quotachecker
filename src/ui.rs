@@ -313,6 +313,10 @@ fn draw_overview_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
                 "◌  No agents configured",
                 Style::default().fg(COLOR_MUTED).italic(),
             )),
+            Line::from(Span::styled(
+                "Press 'r' to force refresh.",
+                Style::default().fg(COLOR_DIM).italic(),
+            )),
         ])
         .alignment(Alignment::Center)
         .block(
@@ -805,6 +809,10 @@ fn draw_agents_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
             )),
             Line::from(Span::styled(
                 "Agent list is empty",
+                Style::default().fg(COLOR_DIM).italic(),
+            )),
+            Line::from(Span::styled(
+                "Press 'r' to force refresh.",
                 Style::default().fg(COLOR_DIM).italic(),
             )),
         ])
