@@ -1593,22 +1593,22 @@ fn draw_settings_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
     let settings = [
         (
             "TUI Active Color Theme",
-            format!("[ {:?} ]", ctx.config.theme),
+            format!("< {:?} >", ctx.config.theme),
             "Customize TUI highlight brand accent",
         ),
         (
             "Telemetry Refresh Interval",
-            format!("[ {}ms ]", ctx.config.refresh_rate_ms),
+            format!("< {}ms >", ctx.config.refresh_rate_ms),
             "How often SQLite files are scanned",
         ),
         (
             "Soft Warning Threshold (%)",
-            format!("[ {}% ]", ctx.config.soft_limit_percent as u32),
+            format!("< {}% >", ctx.config.soft_limit_percent as u32),
             "Usage warning threshold",
         ),
         (
             "Hard Warning Threshold (%)",
-            format!("[ {}% ]", ctx.config.hard_limit_percent as u32),
+            format!("< {}% >", ctx.config.hard_limit_percent as u32),
             "Quota exceeded limit indicator",
         ),
         (

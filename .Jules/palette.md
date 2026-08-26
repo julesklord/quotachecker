@@ -96,3 +96,12 @@
 ## 2026-08-18 - Missing empty state causes out-of-bounds panics
 **Learning:** In TUI applications using Ratatui, rendering detail panes or context-specific keybindings based on a selected index into a data array can cause silent crashes (panics) if the data array is empty. Furthermore, showing contextual keybindings (like "Select" or "Edit") when there is nothing to select or edit is confusing to users.
 **Action:** Always wrap the rendering of detail panes and contextual keybindings with an `!is_empty()` check on the backing dataset. When empty, explicitly render a dedicated empty state paragraph to prevent panics and clarify the application state to the user.
+## 2026-08-26 - Provide visual feedback on disabled inputs
+**Learning:** In TUI applications, modal prompts for numeric values when editing a quota must gracefully handle non-numeric inputs.
+**Action:** Always intercept unhandled non-numeric typing.
+## 2026-08-26 - Provide visual feedback on disabled inputs
+**Learning:** In TUI applications, always wrap Table rendering in an is_empty check and render a dedicated empty state Paragraph instead.
+**Action:** When a table is empty, do not render it, show an empty state.
+## 2026-08-26 - Misleading values wrapped in brackets
+**Learning:** In TUI applications, values wrapped in neutral brackets like '[ ]' are often interpreted as static info, whereas '< >' brackets clearly signal left/right cycleability or navigational affordance.
+**Action:** Use '< >' for values that support horizontal cycle navigation instead of '[ ]' to prevent user confusion.
