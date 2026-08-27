@@ -105,3 +105,6 @@
 ## 2026-08-26 - Misleading values wrapped in brackets
 **Learning:** In TUI applications, values wrapped in neutral brackets like '[ ]' are often interpreted as static info, whereas '< >' brackets clearly signal left/right cycleability or navigational affordance.
 **Action:** Use '< >' for values that support horizontal cycle navigation instead of '[ ]' to prevent user confusion.
+## 2024-08-27 - Misleading Navigational Affordances in Settings
+**Learning:** Using `< >` around setting values (e.g., `< 1000ms >`) strongly implies left/right arrow key navigation. If left/right arrows are already bound to global navigation (like changing tabs), users will accidentally switch tabs when trying to cycle values, causing frustration.
+**Action:** Ensure visual framing of values matches the interaction model. Use neutral brackets like `[ ]` when values are cycled via `Enter` or other keys, reserving `< >` only for actual horizontal navigation.
