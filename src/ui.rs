@@ -1652,6 +1652,10 @@ fn draw_settings_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
                 "◌  No settings available",
                 Style::default().fg(COLOR_MUTED).italic(),
             )),
+            Line::from(Span::styled(
+                "Press 'r' to reload configuration or 'e' to edit manually.",
+                Style::default().fg(COLOR_DIM).italic(),
+            )),
         ])
         .alignment(Alignment::Center)
         .block(
