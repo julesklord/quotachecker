@@ -105,3 +105,6 @@
 ## 2026-08-26 - Misleading values wrapped in brackets
 **Learning:** In TUI applications, values wrapped in neutral brackets like '[ ]' are often interpreted as static info, whereas '< >' brackets clearly signal left/right cycleability or navigational affordance.
 **Action:** Use '< >' for values that support horizontal cycle navigation instead of '[ ]' to prevent user confusion.
+## 2024-10-24 - Empty State CTAs
+**Learning:** In UI design, empty states should include actionable Call-to-Actions (CTAs) guiding the user on how to populate the data or navigate forward, rather than leaving them at a dead-end.
+**Action:** Always include a secondary, lightly styled (e.g. COLOR_DIM italic) text line providing keyboard shortcuts or actions when displaying empty lists/tables.
