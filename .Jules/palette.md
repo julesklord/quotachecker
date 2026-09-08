@@ -105,3 +105,6 @@
 ## 2026-08-26 - Misleading values wrapped in brackets
 **Learning:** In TUI applications, values wrapped in neutral brackets like '[ ]' are often interpreted as static info, whereas '< >' brackets clearly signal left/right cycleability or navigational affordance.
 **Action:** Use '< >' for values that support horizontal cycle navigation instead of '[ ]' to prevent user confusion.
+## 2024-09-07 - Actionable CTAs in Empty States implementation
+**Learning:** Adding actionable CTAs (e.g., "Press 'r' to force refresh.") to empty states across all tables (Summary, Agents, Sessions, Quotas) drastically improves discoverability of actions when users feel stuck at dead-ends.
+**Action:** Always include actionable instructions directly inside the empty state components of data grids or lists to reduce cognitive load.
