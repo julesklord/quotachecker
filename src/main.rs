@@ -424,6 +424,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                         KeyCode::Char(c) if c.is_ascii_digit() => {
                             app.editing_value.push(c);
                         }
+                        KeyCode::Char(_) => {
+                            app.add_log("Only numeric input is allowed.");
+                        }
                         _ => {}
                     }
                 } else {

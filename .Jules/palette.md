@@ -108,3 +108,6 @@
 ## 2024-09-07 - Actionable CTAs in Empty States implementation
 **Learning:** Adding actionable CTAs (e.g., "Press 'r' to force refresh.") to empty states across all tables (Summary, Agents, Sessions, Quotas) drastically improves discoverability of actions when users feel stuck at dead-ends.
 **Action:** Always include actionable instructions directly inside the empty state components of data grids or lists to reduce cognitive load.
+## 2024-10-27 - Handle invalid input gracefully with feedback
+**Learning:** Modal prompts for numeric values must gracefully handle non-numeric inputs by intercepting unhandled non-numeric typing and providing visual feedback to prevent user confusion. Silently ignoring input leaves users wondering if their keyboard is broken or if the app froze.
+**Action:** Always intercept invalid keystrokes in forms (like letters in a number-only field) and display a transient log or error message explaining the restriction (e.g., 'Only numeric input is allowed').
