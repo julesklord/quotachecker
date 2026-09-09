@@ -1601,22 +1601,22 @@ fn draw_settings_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
     let settings = [
         (
             "TUI Active Color Theme",
-            format!("[ {:?} ]", ctx.config.theme),
+            format!("< {:?} >", ctx.config.theme),
             "Customize TUI highlight brand accent",
         ),
         (
             "Telemetry Refresh Interval",
-            format!("[ {}ms ]", ctx.config.refresh_rate_ms),
+            format!("< {}ms >", ctx.config.refresh_rate_ms),
             "How often SQLite files are scanned",
         ),
         (
             "Soft Warning Threshold (%)",
-            format!("[ {}% ]", ctx.config.soft_limit_percent as u32),
+            format!("< {}% >", ctx.config.soft_limit_percent as u32),
             "Usage warning threshold",
         ),
         (
             "Hard Warning Threshold (%)",
-            format!("[ {}% ]", ctx.config.hard_limit_percent as u32),
+            format!("< {}% >", ctx.config.hard_limit_percent as u32),
             "Quota exceeded limit indicator",
         ),
         (
@@ -1834,7 +1834,7 @@ fn draw_footer(f: &mut Frame, area: Rect, ctx: &RenderContext) {
                 if ctx.selected_setting_idx == 4 {
                     footer_spans.extend(kpill("Enter/e", "Open editor", color_primary));
                 } else {
-                    footer_spans.extend(kpill("Enter/+/-/h/l", "Cycle value", color_primary));
+                    footer_spans.extend(kpill("Enter/+/-/←→/h/l", "Cycle value", color_primary));
                     footer_spans.extend(kpill("e", "Open editor", COLOR_DIM));
                 }
             }
