@@ -108,3 +108,6 @@
 ## 2024-09-07 - Actionable CTAs in Empty States implementation
 **Learning:** Adding actionable CTAs (e.g., "Press 'r' to force refresh.") to empty states across all tables (Summary, Agents, Sessions, Quotas) drastically improves discoverability of actions when users feel stuck at dead-ends.
 **Action:** Always include actionable instructions directly inside the empty state components of data grids or lists to reduce cognitive load.
+## 2024-09-08 - Explicit cycleable properties
+**Learning:** Values wrapped in neutral brackets like `[ ]` are often interpreted as static info, missing the affordance to interact with them via cycle keys.
+**Action:** Use `< >` for values that support horizontal cycle navigation instead of `[ ]` to ensure their interactive nature is obvious to users, along with explicitly defining left/right keys for them.

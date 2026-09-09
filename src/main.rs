@@ -424,6 +424,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                         KeyCode::Char(c) if c.is_ascii_digit() => {
                             app.editing_value.push(c);
                         }
+                        KeyCode::Char(_) => {
+                            app.add_log("Numeric values only.");
+                        }
                         _ => {}
                     }
                 } else {
@@ -450,14 +453,22 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                         KeyCode::Char('5') => app.active_tab = 4,
 
                         KeyCode::Left => {
-                            if app.active_tab > 0 {
-                                app.active_tab -= 1;
+                            if app.active_tab == 4 && app.selected_setting_idx != 4 {
+                                app.handle_setting_change(false);
                             } else {
-                                app.active_tab = 4;
+                                if app.active_tab > 0 {
+                                    app.active_tab -= 1;
+                                } else {
+                                    app.active_tab = 4;
+                                }
                             }
                         }
                         KeyCode::Right => {
-                            app.active_tab = (app.active_tab + 1) % 5;
+                            if app.active_tab == 4 && app.selected_setting_idx != 4 {
+                                app.handle_setting_change(true);
+                            } else {
+                                app.active_tab = (app.active_tab + 1) % 5;
+                            }
                         }
 
                         // Modify settings on tab 4 (Settings) with +/- or h/l
