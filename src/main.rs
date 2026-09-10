@@ -99,6 +99,9 @@ impl App {
     }
 
     fn open_budget_modal(&mut self) {
+        if self.agents.is_empty() {
+            return;
+        }
         let agent = &self.agents[self.selected_agent_idx];
         if agent.executable_path.is_none() {
             self.add_log(format!(
@@ -123,6 +126,9 @@ impl App {
     }
 
     fn save_budget_modal(&mut self) {
+        if self.agents.is_empty() {
+            return;
+        }
         if let Ok(val) = self.editing_value.parse::<u32>() {
             self.editing_limit = val;
             let agent_id = self.agents[self.selected_agent_idx].id;
