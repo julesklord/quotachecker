@@ -124,6 +124,12 @@ impl App {
 
     fn save_budget_modal(&mut self) {
         if let Ok(val) = self.editing_value.parse::<u32>() {
+            if val == self.agents[self.selected_agent_idx].quota_limit {
+                self.show_budget_modal = false;
+                self.add_log("Limit is unchanged.");
+                return;
+            }
+
             self.editing_limit = val;
             let agent_id = self.agents[self.selected_agent_idx].id;
             let config_arc = Arc::clone(&self.config);
