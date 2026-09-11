@@ -111,3 +111,7 @@
 ## 2024-09-08 - Explicit cycleable properties
 **Learning:** Values wrapped in neutral brackets like `[ ]` are often interpreted as static info, missing the affordance to interact with them via cycle keys.
 **Action:** Use `< >` for values that support horizontal cycle navigation instead of `[ ]` to ensure their interactive nature is obvious to users, along with explicitly defining left/right keys for them.
+
+## 2026-09-11 - Prevent identical limit saves
+**Learning:** In TUI modals, when a user inputs a value identical to the currently active state and no specific feedback is provided by the backend (even if the frontend shows inline validation), users may be confused whether their action succeeded or was ignored.
+**Action:** When validating form inputs that match the existing state in event handlers, display a neutral, informative message (e.g., 'Limit is unchanged') instead of falling back to default save behavior or falsely implying a change was made.
