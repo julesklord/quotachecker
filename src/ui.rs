@@ -1540,26 +1540,31 @@ fn draw_quotas_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
                     Style::default().fg(Color::Black).bg(COLOR_DIM).bold(),
                 ),
                 Span::styled("  Change screen   ", Style::default().fg(COLOR_MUTED)),
-                Span::styled(
-                    " ↑↓/k/j ",
-                    Style::default().fg(Color::Black).bg(COLOR_DIM).bold(),
-                ),
-                Span::styled("  Select agent   ", Style::default().fg(COLOR_MUTED)),
             ];
 
-            if !ctx.agents.is_empty()
-                && ctx.agents[ctx.selected_agent_idx].executable_path.is_some()
-                && ctx.agents[ctx.selected_agent_idx].quota_type
-                    != crate::agent::QuotaType::Unlimited
-            {
+            if !ctx.agents.is_empty() {
                 spans.push(Span::styled(
-                    " Enter / s ",
-                    Style::default().fg(Color::Black).bg(color_primary).bold(),
+                    " ↑↓/k/j ",
+                    Style::default().fg(Color::Black).bg(COLOR_DIM).bold(),
                 ));
                 spans.push(Span::styled(
-                    "  Edit limit   ",
+                    "  Select agent   ",
                     Style::default().fg(COLOR_MUTED),
                 ));
+
+                if ctx.agents[ctx.selected_agent_idx].executable_path.is_some()
+                    && ctx.agents[ctx.selected_agent_idx].quota_type
+                        != crate::agent::QuotaType::Unlimited
+                {
+                    spans.push(Span::styled(
+                        " Enter / s ",
+                        Style::default().fg(Color::Black).bg(color_primary).bold(),
+                    ));
+                    spans.push(Span::styled(
+                        "  Edit limit   ",
+                        Style::default().fg(COLOR_MUTED),
+                    ));
+                }
             }
 
             spans.push(Span::styled(
@@ -1754,7 +1759,7 @@ fn draw_settings_tab(f: &mut Frame, area: Rect, ctx: &RenderContext) {
                 ));
             } else {
                 spans.push(Span::styled(
-                    " Enter / +/- / h / l ",
+                    " Enter / +/- / ←→ / h / l ",
                     Style::default().fg(Color::Black).bg(COLOR_DIM).bold(),
                 ));
                 spans.push(Span::styled(
