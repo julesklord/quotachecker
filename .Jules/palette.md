@@ -115,3 +115,7 @@
 ## 2026-09-11 - Prevent identical limit saves
 **Learning:** In TUI modals, when a user inputs a value identical to the currently active state and no specific feedback is provided by the backend (even if the frontend shows inline validation), users may be confused whether their action succeeded or was ignored.
 **Action:** When validating form inputs that match the existing state in event handlers, display a neutral, informative message (e.g., 'Limit is unchanged') instead of falling back to default save behavior or falsely implying a change was made.
+
+## 2024-10-18 - Avoid Keybind Collisions for Global vs Local Actions
+**Learning:** Binding Left/Right arrows to cycle values in the Settings tab breaks the global expectation that Left/Right arrows switch tabs, leading to a conflicting interaction model and confusing users.
+**Action:** Remove the Left/Right value cycling override so standard tab navigation remains functional across all views. Use neutral brackets `[ ]` instead of `< >` for cycleable values to visually indicate that horizontal navigation (Left/Right arrows) is not the interaction method for changing the values.
