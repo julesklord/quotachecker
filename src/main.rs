@@ -459,22 +459,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                         KeyCode::Char('5') => app.active_tab = 4,
 
                         KeyCode::Left => {
-                            if app.active_tab == 4 && app.selected_setting_idx != 4 {
-                                app.handle_setting_change(false);
+                            if app.active_tab > 0 {
+                                app.active_tab -= 1;
                             } else {
-                                if app.active_tab > 0 {
-                                    app.active_tab -= 1;
-                                } else {
-                                    app.active_tab = 4;
-                                }
+                                app.active_tab = 4;
                             }
                         }
                         KeyCode::Right => {
-                            if app.active_tab == 4 && app.selected_setting_idx != 4 {
-                                app.handle_setting_change(true);
-                            } else {
-                                app.active_tab = (app.active_tab + 1) % 5;
-                            }
+                            app.active_tab = (app.active_tab + 1) % 5;
                         }
 
                         // Modify settings on tab 4 (Settings) with +/- or h/l
