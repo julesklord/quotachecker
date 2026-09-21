@@ -688,7 +688,7 @@ impl AgentScanner {
         // Try `--version` first
         if let Ok(output) = Command::new(executable).arg("--version").output() {
             if output.status.success() {
-                let ver = String::from_utf8_lossy(&output.stdout).trim().to_string();
+                let ver = String::from_utf8_lossy(&output.stdout).replace("\r\n", "\n").trim().to_string();
                 let first_line = ver.lines().next().unwrap_or("").to_string();
                 if !first_line.is_empty() {
                     return Some(first_line);
@@ -699,7 +699,7 @@ impl AgentScanner {
         // Fallback to `-v`
         if let Ok(output) = Command::new(executable).arg("-v").output() {
             if output.status.success() {
-                let ver = String::from_utf8_lossy(&output.stdout).trim().to_string();
+                let ver = String::from_utf8_lossy(&output.stdout).replace("\r\n", "\n").trim().to_string();
                 let first_line = ver.lines().next().unwrap_or("").to_string();
                 if !first_line.is_empty() {
                     return Some(first_line);
