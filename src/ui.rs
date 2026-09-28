@@ -1890,6 +1890,8 @@ fn draw_budget_modal(f: &mut Frame, area: Rect, ctx: &RenderContext) {
     let active_agent = &ctx.agents[ctx.selected_agent_idx];
     let agent_color = get_agent_color(active_agent.id);
 
+    let is_valid = ctx.editing_value.parse::<u32>().is_ok();
+
     let modal_block = Block::default()
         .borders(Borders::ALL)
         .border_type(BorderType::Rounded)
@@ -1899,10 +1901,13 @@ fn draw_budget_modal(f: &mut Frame, area: Rect, ctx: &RenderContext) {
             format!(" ⚙ QUOTA LIMIT — {} ", active_agent.name.to_uppercase()),
             Style::default().fg(agent_color).bold(),
         ))
-        .title_bottom(Span::styled(
-            " Enter ✔ Save  │  Esc ✘ Cancel ",
-            Style::default().fg(COLOR_MUTED),
-        ));
+        .title_bottom(Line::from(vec![
+            Span::styled(
+                if is_valid { " Enter ✔ Save " } else { " Enter ✘ Disabled " },
+                if is_valid { Style::default().fg(COLOR_MUTED) } else { Style::default().fg(COLOR_DIM) },
+            ),
+            Span::styled(" │  Esc ✘ Cancel ", Style::default().fg(COLOR_MUTED)),
+        ]));
 
     let inner_rect = modal_block.inner(modal_rect);
     f.render_widget(modal_block, modal_rect);
