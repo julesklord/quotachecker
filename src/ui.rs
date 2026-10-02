@@ -1890,6 +1890,15 @@ fn draw_budget_modal(f: &mut Frame, area: Rect, ctx: &RenderContext) {
     let active_agent = &ctx.agents[ctx.selected_agent_idx];
     let agent_color = get_agent_color(active_agent.id);
 
+    let display_val = ctx.editing_value.to_string();
+    let is_valid = display_val.parse::<u32>().is_ok() && !display_val.is_empty();
+
+    let enter_hint = if is_valid {
+        " Enter ✔ Save  │  Esc ✘ Cancel "
+    } else {
+        " Enter ⊘ Disabled  │  Esc ✘ Cancel "
+    };
+
     let modal_block = Block::default()
         .borders(Borders::ALL)
         .border_type(BorderType::Rounded)
@@ -1900,7 +1909,7 @@ fn draw_budget_modal(f: &mut Frame, area: Rect, ctx: &RenderContext) {
             Style::default().fg(agent_color).bold(),
         ))
         .title_bottom(Span::styled(
-            " Enter ✔ Save  │  Esc ✘ Cancel ",
+            enter_hint,
             Style::default().fg(COLOR_MUTED),
         ));
 
@@ -1942,8 +1951,6 @@ fn draw_budget_modal(f: &mut Frame, area: Rect, ctx: &RenderContext) {
     } else {
         " "
     };
-    let display_val = ctx.editing_value.to_string();
-    let is_valid = display_val.parse::<u32>().is_ok();
 
     let row_chunks = Layout::default()
         .direction(Direction::Horizontal)
