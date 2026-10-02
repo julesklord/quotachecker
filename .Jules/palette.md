@@ -115,3 +115,7 @@
 ## 2026-09-11 - Prevent identical limit saves
 **Learning:** In TUI modals, when a user inputs a value identical to the currently active state and no specific feedback is provided by the backend (even if the frontend shows inline validation), users may be confused whether their action succeeded or was ignored.
 **Action:** When validating form inputs that match the existing state in event handlers, display a neutral, informative message (e.g., 'Limit is unchanged') instead of falling back to default save behavior or falsely implying a change was made.
+
+## 2024-10-25 - Dimming Contextual Actions on Invalid Input
+**Learning:** In TUI form validations, specifically modals, displaying an inline error message ("⚠ Number too large" or "ℹ Please enter a numeric limit") is helpful, but if the save action keybind (e.g., "Enter ✔ Save") remains fully styled and highlighted, users still perceive the form as actionable. This disconnect causes users to press the save key and feel frustrated when nothing happens.
+**Action:** Always dynamically update modal action keybind hints (e.g., dimming the 'Enter' key and changing text to "Disabled") to visually reflect when the current input is structurally invalid, providing immediate and cohesive feedback about the form's disabled state across all related UI elements (both local modal headers and global footers).
