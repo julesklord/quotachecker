@@ -1809,7 +1809,9 @@ fn draw_footer(f: &mut Frame, area: Rect, ctx: &RenderContext) {
     let mut footer_spans: Vec<Span> = Vec::new();
 
     if ctx.show_budget_modal {
-        footer_spans.extend(kpill("Enter", "Save", color_primary));
+        let is_valid = ctx.editing_value.parse::<u32>().is_ok();
+        let enter_color = if is_valid { color_primary } else { COLOR_DIM };
+        footer_spans.extend(kpill("Enter", "Save", enter_color));
         footer_spans.extend(kpill("Esc", "Cancel", COLOR_DIM));
     } else {
         footer_spans.extend(kpill("q/Esc", "Quit", COLOR_DANGER));
@@ -1890,6 +1892,18 @@ fn draw_budget_modal(f: &mut Frame, area: Rect, ctx: &RenderContext) {
     let active_agent = &ctx.agents[ctx.selected_agent_idx];
     let agent_color = get_agent_color(active_agent.id);
 
+    let is_valid = ctx.editing_value.parse::<u32>().is_ok();
+
+    let mut title_bottom_spans = Vec::new();
+    title_bottom_spans.push(Span::styled(" ", Style::default()));
+
+    if is_valid {
+        title_bottom_spans.push(Span::styled("Enter ✔ Save", Style::default().fg(color_primary).bold()));
+    } else {
+        title_bottom_spans.push(Span::styled("Enter ✔ Save", Style::default().fg(COLOR_DIM)));
+    }
+    title_bottom_spans.push(Span::styled("  │  Esc ✘ Cancel ", Style::default().fg(COLOR_MUTED)));
+
     let modal_block = Block::default()
         .borders(Borders::ALL)
         .border_type(BorderType::Rounded)
@@ -1899,10 +1913,7 @@ fn draw_budget_modal(f: &mut Frame, area: Rect, ctx: &RenderContext) {
             format!(" ⚙ QUOTA LIMIT — {} ", active_agent.name.to_uppercase()),
             Style::default().fg(agent_color).bold(),
         ))
-        .title_bottom(Span::styled(
-            " Enter ✔ Save  │  Esc ✘ Cancel ",
-            Style::default().fg(COLOR_MUTED),
-        ));
+        .title_bottom(Line::from(title_bottom_spans));
 
     let inner_rect = modal_block.inner(modal_rect);
     f.render_widget(modal_block, modal_rect);
