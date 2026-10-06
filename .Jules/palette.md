@@ -115,3 +115,6 @@
 ## 2026-09-11 - Prevent identical limit saves
 **Learning:** In TUI modals, when a user inputs a value identical to the currently active state and no specific feedback is provided by the backend (even if the frontend shows inline validation), users may be confused whether their action succeeded or was ignored.
 **Action:** When validating form inputs that match the existing state in event handlers, display a neutral, informative message (e.g., 'Limit is unchanged') instead of falling back to default save behavior or falsely implying a change was made.
+## 2026-10-25 - Dynamically update modal action keybind hints
+**Learning:** In TUI applications, dynamically update modal action keybind hints (e.g., dimming the 'Enter' save key) to visually reflect when the current input is invalid, providing immediate structural feedback about the form's disabled state. Ensure the visual change is applied consistently across all UI components where the keybind is advertised (e.g., both local modal headers and global screen footers).
+**Action:** Always visually disable keybind hints when the action is contextually unavailable.
