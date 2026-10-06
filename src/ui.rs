@@ -1809,7 +1809,13 @@ fn draw_footer(f: &mut Frame, area: Rect, ctx: &RenderContext) {
     let mut footer_spans: Vec<Span> = Vec::new();
 
     if ctx.show_budget_modal {
-        footer_spans.extend(kpill("Enter", "Save", color_primary));
+        let is_valid = ctx.editing_value.parse::<u32>().is_ok();
+        let save_color = if !is_valid || ctx.editing_value.is_empty() {
+            Color::Rgb(80, 80, 85)
+        } else {
+            color_primary
+        };
+        footer_spans.extend(kpill("Enter", "Save", save_color));
         footer_spans.extend(kpill("Esc", "Cancel", COLOR_DIM));
     } else {
         footer_spans.extend(kpill("q/Esc", "Quit", COLOR_DANGER));
@@ -1890,6 +1896,15 @@ fn draw_budget_modal(f: &mut Frame, area: Rect, ctx: &RenderContext) {
     let active_agent = &ctx.agents[ctx.selected_agent_idx];
     let agent_color = get_agent_color(active_agent.id);
 
+    let display_val = ctx.editing_value.to_string();
+    let is_valid = display_val.parse::<u32>().is_ok();
+
+    let save_color = if !is_valid || display_val.is_empty() {
+        Color::Rgb(80, 80, 85) // Disabled/Dimmed
+    } else {
+        COLOR_SUCCESS
+    };
+
     let modal_block = Block::default()
         .borders(Borders::ALL)
         .border_type(BorderType::Rounded)
@@ -1899,10 +1914,16 @@ fn draw_budget_modal(f: &mut Frame, area: Rect, ctx: &RenderContext) {
             format!(" ⚙ QUOTA LIMIT — {} ", active_agent.name.to_uppercase()),
             Style::default().fg(agent_color).bold(),
         ))
-        .title_bottom(Span::styled(
-            " Enter ✔ Save  │  Esc ✘ Cancel ",
-            Style::default().fg(COLOR_MUTED),
-        ));
+        .title_bottom(Line::from(vec![
+            Span::styled(
+                if !is_valid || display_val.is_empty() { " Enter ✘ Invalid  │" } else { " Enter ✔ Save  │" },
+                Style::default().fg(save_color),
+            ),
+            Span::styled(
+                "  Esc ✘ Cancel ",
+                Style::default().fg(COLOR_MUTED),
+            ),
+        ]));
 
     let inner_rect = modal_block.inner(modal_rect);
     f.render_widget(modal_block, modal_rect);
@@ -1942,8 +1963,6 @@ fn draw_budget_modal(f: &mut Frame, area: Rect, ctx: &RenderContext) {
     } else {
         " "
     };
-    let display_val = ctx.editing_value.to_string();
-    let is_valid = display_val.parse::<u32>().is_ok();
 
     let row_chunks = Layout::default()
         .direction(Direction::Horizontal)
