@@ -422,7 +422,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                             app.add_log("Cancelled.");
                         }
                         KeyCode::Enter => {
-                            app.save_budget_modal();
+                            if app.editing_value.parse::<u32>().is_ok() {
+                                app.save_budget_modal();
+                            } else {
+                                app.add_log("Cannot save invalid limit.");
+                            }
                         }
                         KeyCode::Backspace => {
                             app.editing_value.pop();
