@@ -115,3 +115,6 @@
 ## 2026-09-11 - Prevent identical limit saves
 **Learning:** In TUI modals, when a user inputs a value identical to the currently active state and no specific feedback is provided by the backend (even if the frontend shows inline validation), users may be confused whether their action succeeded or was ignored.
 **Action:** When validating form inputs that match the existing state in event handlers, display a neutral, informative message (e.g., 'Limit is unchanged') instead of falling back to default save behavior or falsely implying a change was made.
+## 2024-05-18 - [Prevent Global Navigation Overrides]
+**Learning:** Overriding global navigation keybindings (like Left/Right arrows for tab switching) with local actions (like cycling values in a specific view) creates a confusing user experience, breaking established navigational models.
+**Action:** When designing TUI applications, ensure global navigation keys remain consistent across all views and do not hijack them for local interactions. Provide alternative local bindings (e.g., `h/l`, `+/-`, `Enter`) instead.
