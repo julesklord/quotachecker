@@ -115,3 +115,7 @@
 ## 2026-09-11 - Prevent identical limit saves
 **Learning:** In TUI modals, when a user inputs a value identical to the currently active state and no specific feedback is provided by the backend (even if the frontend shows inline validation), users may be confused whether their action succeeded or was ignored.
 **Action:** When validating form inputs that match the existing state in event handlers, display a neutral, informative message (e.g., 'Limit is unchanged') instead of falling back to default save behavior or falsely implying a change was made.
+
+## 2024-05-15 - Missing empty state causes out-of-bounds panics
+**Learning:** In TUI applications using Ratatui, rendering detail panes or context-specific keybindings based on a selected index into a data array can cause silent crashes (panics) if the data array is empty. Furthermore, showing contextual keybindings (like "Select" or "Edit") when there is nothing to select or edit is confusing to users.
+**Action:** Always wrap the rendering of detail panes and contextual keybindings with an `!is_empty()` check on the backing dataset. When empty, explicitly render a dedicated empty state paragraph to prevent panics and clarify the application state to the user.
